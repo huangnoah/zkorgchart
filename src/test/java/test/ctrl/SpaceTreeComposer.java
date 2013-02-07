@@ -40,12 +40,12 @@ public class SpaceTreeComposer extends SelectorComposer<Window> {
 		SpaceTreeNode<?> root = new SpaceTreeNode(new UserDataBean("0", "God", 0), rootChildren);
 		
 		DefaultTreeModel model = new DefaultTreeModel(root);
-		myComp.setModel(model);
+		myComp.initModel(model);
 	}
 	
 	@Listen("onClick= #add")
 	public void addNode() {
-	    SpaceTreeNode node = new SpaceTreeNode(new UserDataBean(conut++ +"", "oh my god", conut++), null);
+	    SpaceTreeNode node = new SpaceTreeNode(new UserDataBean(conut++ +"", "iron man", conut++), null);
 	    myComp.add(node, myComp.getSelectedNodeId());
 	}
 	
@@ -57,7 +57,7 @@ public class SpaceTreeComposer extends SelectorComposer<Window> {
 	@Listen("onSelect= #myComp")
 	public void editNode() {
 		SpaceTreeNode seld = myComp.getSelectedNode();
-		seld.setData(new UserDataBean(seld.getId(), "oh my god", conut++));
+		seld.setData(new UserDataBean(seld.getId(), "batman", conut++));
 	}
 
 }

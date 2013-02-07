@@ -76,9 +76,13 @@ addon.OrgChart = zk.$extends(zul.Widget, {
 		addNodeJson : _zkf,
 		adding : _zkf,
 		removing : _zkf,
-		level : _zkf,
-		nodetype : _zkf,
-		duration : _zkf,
+		level : _render = function() {
+			if (this.desktop) {
+				this.rerender();
+			}
+		},
+		nodetype : _render,
+		duration : _render,
 		orient : function() {
 			if (this.desktop) {
 				var component = this;
@@ -141,8 +145,7 @@ addon.OrgChart = zk.$extends(zul.Widget, {
 
 	remove : function(nodeid) {
 		var component = this;
-		
-		var isRoot = nodeid === component._json["id"];
+		var isRoot = (nodeid === jq.evalJSON(component._oriJson)["id"]);
 		if (!isRoot) {
 			if (!component._removing) {
 				component._removing = true;

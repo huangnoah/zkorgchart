@@ -3,7 +3,7 @@
 		<orgchart id="myComp" level="3" nodetype="circle"
 			duration="250" orient="right" align="right">
 		</orgchart>
-		<!-- div>init</div>
+		<div>init</div>
 		<div>
 			<label value="level" />
 			<decimalbox id="level" value="1" />
@@ -26,7 +26,7 @@
 			<decimalbox id="duration" value="500" />
 			<button label="setDuration"
 				onClick="myComp.setDuration(duration.intValue())" />
-		</div -->
+		</div>
 		<div>animate</div>
 		<div>
 			<label value="orient" />
