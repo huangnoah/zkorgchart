@@ -1,0 +1,41 @@
+package org.zkoss.model;
+
+import org.zkoss.addon.SpaceTreeData;
+import org.zkoss.json.JSONObject;
+
+public class UserDataBean implements SpaceTreeData<JSONObject> {
+
+	private String id;
+	private String name;
+	private int age;
+
+	public UserDataBean(String id, String name, int age) {
+		super();
+		this.id = id;
+		this.name = name;
+		this.age = age;
+	}
+
+	public String getId() {
+		return id;
+	}
+
+	public JSONObject getJsonData() {
+		JSONObject json = new JSONObject();
+		json.put("age", age);
+		return json;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+}
