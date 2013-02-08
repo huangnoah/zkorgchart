@@ -45,7 +45,7 @@ public class SpaceTreeComposer extends SelectorComposer<Window> {
 	
 	@Listen("onClick= #add")
 	public void addNode() {
-	    SpaceTreeNode node = new SpaceTreeNode(new UserDataBean(conut++ +"", "iron man", conut++), null);
+	    SpaceTreeNode node = new SpaceTreeNode(new UserDataBean(conut++ +"", "Allen", conut++), null);
 	    myComp.add(node, myComp.getSelectedNodeId());
 	}
 	
@@ -57,7 +57,7 @@ public class SpaceTreeComposer extends SelectorComposer<Window> {
 	@Listen("onSelect= #myComp")
 	public void editNode() {
 		SpaceTreeNode seld = myComp.getSelectedNode();
-		seld.setData(new UserDataBean(seld.getId(), "batman", conut++));
+		seld.setData(new UserDataBean(seld.getId(), "Augustin", conut++));
 	}
 
 }

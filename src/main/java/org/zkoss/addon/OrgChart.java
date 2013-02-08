@@ -18,6 +18,7 @@ public class OrgChart<E extends SpaceTreeData<?>> extends XulElement {
 
 	static {
 		addClientEvent(OrgChart.class, Events.ON_SELECT, CE_IMPORTANT);
+		addClientEvent(OrgChart.class, Events.ON_USER, CE_IMPORTANT);
 	}
 
 	/* Here's a simple example for how to implements a member field */
@@ -74,7 +75,7 @@ public class OrgChart<E extends SpaceTreeData<?>> extends XulElement {
 	public DefaultTreeModel getModel() {
 		return _model;
 	}
-	
+
 	public String getNodetype() {
 		return _nodetype;
 	}
@@ -102,8 +103,8 @@ public class OrgChart<E extends SpaceTreeData<?>> extends XulElement {
 		return (this._zclass != null ? this._zclass : "z-orgchart");
 	}
 
-	public void initModel(DefaultTreeModel model){
-		if(init) {
+	public void initModel(DefaultTreeModel model) {
+		if (init) {
 			setSelectedNodeId(((SpaceTreeNode) model.getRoot()).getId());
 			setModel(model);
 			init = false;
@@ -195,7 +196,8 @@ public class OrgChart<E extends SpaceTreeData<?>> extends XulElement {
 		Map data = request.getData();
 
 		String jsonTree = ((SpaceTreeNode<?>) _model.getRoot()).toJSONString();
-		if ("onSelect".equals(cmd)) {
+		
+		if (Events.ON_SELECT.equals(cmd)) {
 			setSelectedNodeId(data.get("selectedNodeId").toString());
 			Events.sendEvent(evt);
 			String newJsonTree = ((SpaceTreeNode<?>) _model.getRoot())
@@ -203,6 +205,9 @@ public class OrgChart<E extends SpaceTreeData<?>> extends XulElement {
 			if (!newJsonTree.equals(jsonTree)) {
 				setCmd("refresh");
 			}
+		} else if (Events.ON_USER.equals(cmd)) {
+			setSelectedNodeId(data.get("selectedNodeId").toString());
+			Events.postEvent(evt);
 		} else {
 			super.service(request, everError);
 		}

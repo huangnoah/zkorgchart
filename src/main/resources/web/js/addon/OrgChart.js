@@ -134,32 +134,37 @@ addon.OrgChart = zk.$extends(zul.Widget, {
 			if (this._cmd === 'remove') {
 				this.remove(this._selectedNodeId);
 			} else if (this._cmd === 'add') {
-				this.add(this._selectedNodeId, this._addNodeJson);
+				this.add(this._addNodeJson, this._selectedNodeId);
 			} else if (this._cmd === 'refresh') {
 				component._st.loadJSON(jq.evalJSON(this._json));
 				component._st.refresh();
-
 			}
 		}
 	},
 
 	remove : function(nodeid) {
 		var component = this;
-		var isRoot = (nodeid === jq.evalJSON(component._oriJson)["id"]);
+		var oriJson = jq.evalJSON(component._oriJson);
+		var isRoot = (nodeid === oriJson["id"]);
 		if (!isRoot) {
 			if (!component._removing) {
 				component._removing = true;
+				var parent = $jit.json.getParent(oriJson, nodeid);
 				component._st.removeSubtree(nodeid, true, 'animate', {
 					hideLabels : false,
 					onComplete : function() {
 						component._removing = false;
+						component._selectedNodeId = parent.id;
+						component.fire('onUser', {
+							selectedNodeId : parent.id
+						});
 					}
 				});
 			}
 		}
 	},
 
-	add : function(parentId, nodeJson) {
+	add : function(nodeJson, parentId) {
 		var component = this;
 		if (!component._adding) {
 			component._adding = true;
@@ -170,6 +175,11 @@ addon.OrgChart = zk.$extends(zul.Widget, {
 				hideLabels : false,
 				onComplete : function() {
 					component._adding = false;
+					var oriJson = jq.evalJSON(component._oriJson)
+					if (parentId === oriJson["id"]) {
+						component._st.select(parentId);
+						component._st.refresh();
+					}
 				}
 			});
 		}
@@ -186,7 +196,7 @@ addon.OrgChart = zk.$extends(zul.Widget, {
 
 		this._st = new $jit.ST(this.initSTOpts_());
 
-		var treeJson = jq.evalJSON(this._json)
+		var treeJson = jq.evalJSON(this._json);
 		// load json data
 		this._st.loadJSON(treeJson);
 		// compute node positions and layout
@@ -212,6 +222,7 @@ addon.OrgChart = zk.$extends(zul.Widget, {
 		// bind_
 		// this.domUnlisten_(this.$n("cave"), "onClick",
 		// "_doItemsClick");
+		this._st = null;
 
 		/*
 		 * For widget lifecycle , the super unbind_ should be called as LAST
