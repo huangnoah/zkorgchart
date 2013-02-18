@@ -13,8 +13,8 @@
 
 .z-orgchart-infovis {
     position:relative;
-    width:1024px;
-    height:768px;
+    width:800px;
+    height:600px;
     margin:auto;
     overflow:hidden;
 }

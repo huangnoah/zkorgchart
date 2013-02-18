@@ -37,7 +37,7 @@ public class SpaceTreeComposer extends SelectorComposer<Window> {
 		List<SpaceTreeNode<?>> rootChildren = new ArrayList<SpaceTreeNode<?>>();
 		rootChildren.add(first);
 		rootChildren.add(second);
-		SpaceTreeNode<?> root = new SpaceTreeNode(new UserDataBean("0", "God", 0), rootChildren);
+		SpaceTreeNode<?> root = new SpaceTreeNode(new UserDataBean("0", "Peter", 0), rootChildren);
 		
 		DefaultTreeModel model = new DefaultTreeModel(root);
 		myComp.initModel(model);

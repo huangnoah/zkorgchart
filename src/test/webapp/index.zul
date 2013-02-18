@@ -1,54 +1,68 @@
 <zk>
 	<window id="mainWin" apply="test.ctrl.SpaceTreeComposer">
-		<orgchart id="myComp" level="3" nodetype="circle"
-			duration="250" orient="right" align="right">
+		<orgchart id="myComp" level="3" nodetype="circle" duration="250"
+			orient="right" align="right">
 		</orgchart>
-		<div>init</div>
-		<div>
-			<label value="level" />
-			<decimalbox id="level" value="1" />
-			<button label="setLevel"
-				onClick="myComp.setLevel(level.intValue())" />
-		</div>
-		<div>
-			<label value="nodetype" />
-			<button id="circle" label="circle"
-				onClick="myComp.setNodetype(circle.label)" />
-			<button id="rectangle" label="rectangle"
-				onClick="myComp.setNodetype(rectangle.label)" />
-			<button id="square" label="square"
-				onClick="myComp.setNodetype(square.label)" />
-			<button id="ellipse" label="ellipse"
-				onClick="myComp.setNodetype(ellipse.label)" />
-		</div>
-		<div>
-			<label value="duration" />
-			<decimalbox id="duration" value="500" />
-			<button label="setDuration"
-				onClick="myComp.setDuration(duration.intValue())" />
-		</div>
-		<div>animate</div>
-		<div>
-			<label value="orient" />
-			<button id="left" label="left"
-				onClick="myComp.setOrient(left.label)" />
-			<button id="top" label="top"
-				onClick="myComp.setOrient(top.label)" />
-			<button id="right" label="right"
-				onClick="myComp.setOrient(right.label)" />
-			<button id="bottom" label="bottom"
-				onClick="myComp.setOrient(bottom.label)" />
-		</div>
-		<div>
-			<label value="align" />
-			<button id="left1" label="left"
-				onClick="myComp.setAlign(left1.label)" />
-			<button id="center1" label="center"
-				onClick="myComp.setAlign(center1.label)" />
-			<button id="right1" label="right"
-				onClick="myComp.setAlign(right1.label)" />
-		</div>
-		<button id="add" label="add" />
-		<button id="remove" label="remove" />
+		<vbox height="100%" width="100%" pack="center" align="center">
+			<grid width="600px">
+				<columns>
+					<column label="" hflex="1" />
+					<column label="" hflex="1" />
+					<column label="" hflex="1" />
+					<column label="" hflex="1" />
+					<column label="" hflex="1" />
+				</columns>
+				<rows>
+					<row>
+						<label hflex="1" vflex="1" value="level" />
+						<decimalbox hflex="1" id="level" value="1" />
+						<button hflex="1" label="setLevel"
+							onClick="myComp.setLevel(level.intValue())" />
+					</row>
+					<row>
+						<label value="nodetype" hflex="1" />
+						<button hflex="1" id="circle" label="circle"
+							onClick="myComp.setNodetype(circle.label)" />
+						<button hflex="1" id="rectangle"
+							label="rectangle" onClick="myComp.setNodetype(rectangle.label)" />
+						<button hflex="1" id="square" label="square"
+							onClick="myComp.setNodetype(square.label)" />
+						<button hflex="1" id="ellipse" label="ellipse"
+							onClick="myComp.setNodetype(ellipse.label)" />
+					</row>
+					<row>
+						<label hflex="1" value="duration" />
+						<decimalbox hflex="1" id="duration" value="500" />
+						<button hflex="1" label="setDuration"
+							onClick="myComp.setDuration(duration.intValue())" />
+					</row>
+					<row>
+						<label hflex="1" value="orient" />
+						<button hflex="1" id="left" label="left"
+							onClick="myComp.setOrient(left.label)" />
+						<button hflex="1" id="top" label="top"
+							onClick="myComp.setOrient(top.label)" />
+						<button hflex="1" id="right" label="right"
+							onClick="myComp.setOrient(right.label)" />
+						<button hflex="1" id="bottom" label="bottom"
+							onClick="myComp.setOrient(bottom.label)" />
+					</row>
+					<row>
+						<label hflex="1" value="align" />
+						<button hflex="1" id="left1" label="left"
+							onClick="myComp.setAlign(left1.label)" />
+						<button hflex="1" id="center1" label="center"
+							onClick="myComp.setAlign(center1.label)" />
+						<button hflex="1" id="right1" label="right"
+							onClick="myComp.setAlign(right1.label)" />
+					</row>
+					<row>
+						<label hflex="1" value="operation" />
+						<button hflex="1" id="add" label="add" />
+						<button hflex="1" id="remove" label="remove" />
+					</row>
+				</rows>
+			</grid>
+		</vbox>
 	</window>
 </zk>
