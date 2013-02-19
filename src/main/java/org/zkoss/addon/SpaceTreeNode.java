@@ -7,7 +7,6 @@ import java.util.Map;
 import org.zkoss.json.JSONAware;
 import org.zkoss.json.JSONObject;
 import org.zkoss.zul.DefaultTreeNode;
-import org.zkoss.zul.TreeNode;
 
 public class SpaceTreeNode<E extends SpaceTreeData<?>> extends
 		DefaultTreeNode<E> implements JSONAware {
