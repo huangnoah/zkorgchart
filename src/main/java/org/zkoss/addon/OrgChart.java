@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.zkoss.json.JSONAware;
-import org.zkoss.json.JSONObject;
 import org.zkoss.lang.Objects;
 import org.zkoss.zk.au.AuRequest;
 import org.zkoss.zk.ui.Component;
@@ -17,7 +16,7 @@ import org.zkoss.zul.impl.XulElement;
 public class OrgChart<E extends SpaceTreeData<?>> extends XulElement {
 
 	static {
-		addClientEvent(OrgChart.class, Events.ON_SELECT, CE_IMPORTANT);
+		addClientEvent(OrgChart.class, Events.ON_SELECT, CE_DUPLICATE_IGNORE | CE_IMPORTANT);
 		addClientEvent(OrgChart.class, Events.ON_USER, CE_IMPORTANT);
 	}
 
@@ -30,7 +29,6 @@ public class OrgChart<E extends SpaceTreeData<?>> extends XulElement {
 	private String _orient = "left";
 	private DefaultTreeModel<E> _model;
 	private String _json = "{}";
-	private SelectEvent _onSelect;
 	private String _selectedNodeId;
 	private String _cmd = "";
 	private String _addNodeJson = "{}";
@@ -80,10 +78,6 @@ public class OrgChart<E extends SpaceTreeData<?>> extends XulElement {
 		return _nodetype;
 	}
 
-	public SelectEvent getOnSelect() {
-		return _onSelect;
-	}
-
 	public String getOrient() {
 		return _orient;
 	}
@@ -101,14 +95,6 @@ public class OrgChart<E extends SpaceTreeData<?>> extends XulElement {
 	 */
 	public String getZclass() {
 		return (this._zclass != null ? this._zclass : "z-orgchart");
-	}
-
-	public void initModel(DefaultTreeModel model) {
-		if (init) {
-			setSelectedNodeId(((SpaceTreeNode) model.getRoot()).getId());
-			setModel(model);
-			init = false;
-		}
 	}
 
 	// graph depth-first-search algorithms
@@ -185,7 +171,6 @@ public class OrgChart<E extends SpaceTreeData<?>> extends XulElement {
 			render(renderer, "selectedNodeId", _selectedNodeId);
 		if (!Objects.equals(_addNodeJson, "{}"))
 			render(renderer, "addNodeJson", _addNodeJson);
-		render(renderer, "onSelect", _onSelect);
 
 	}
 
@@ -196,7 +181,7 @@ public class OrgChart<E extends SpaceTreeData<?>> extends XulElement {
 		Map data = request.getData();
 
 		String jsonTree = ((SpaceTreeNode<?>) _model.getRoot()).toJSONString();
-		
+
 		if (Events.ON_SELECT.equals(cmd)) {
 			setSelectedNodeId(data.get("selectedNodeId").toString());
 			Events.sendEvent(evt);
@@ -259,6 +244,11 @@ public class OrgChart<E extends SpaceTreeData<?>> extends XulElement {
 	}
 
 	public void setModel(DefaultTreeModel model) {
+		if (init) {
+			setSelectedNodeId(((SpaceTreeNode) model.getRoot()).getId());
+			init = false;
+		} 
+		
 		if (!Objects.equals(_model, model)) {
 			_model = model;
 			updateJson();
@@ -269,13 +259,6 @@ public class OrgChart<E extends SpaceTreeData<?>> extends XulElement {
 		if (!Objects.equals(_nodetype, nodetype)) {
 			_nodetype = nodetype;
 			smartUpdate("nodetype", _nodetype);
-		}
-	}
-
-	public void setOnSelect(SelectEvent onSelect) {
-		if (!Objects.equals(_onSelect, onSelect)) {
-			_onSelect = onSelect;
-			smartUpdate("onSelect", _onSelect);
 		}
 	}
 

@@ -40,7 +40,7 @@ public class SpaceTreeComposer extends SelectorComposer<Window> {
 		SpaceTreeNode<?> root = new SpaceTreeNode(new UserDataBean("0", "Peter", 0), rootChildren);
 		
 		DefaultTreeModel model = new DefaultTreeModel(root);
-		myComp.initModel(model);
+		myComp.setModel(model);
 	}
 	
 	@Listen("onClick= #add")
