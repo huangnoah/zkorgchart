@@ -2,7 +2,7 @@
     <addon-name>orgchart</addon-name>
   	<version>
 		<version-class>org.zkoss.addon.Version</version-class>
-		<version-uid>0.8.0-SNAPSHOT</version-uid>
+		<version-uid>0.8.0</version-uid>
 		<zk-version>6.5.0</zk-version><!-- or later -->
 	</version>
     
