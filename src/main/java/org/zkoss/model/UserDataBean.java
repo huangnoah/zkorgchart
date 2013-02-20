@@ -20,12 +20,6 @@ public class UserDataBean implements SpaceTreeData<JSONObject> {
 		return id;
 	}
 
-	public JSONObject getJsonData() {
-		JSONObject json = new JSONObject();
-		json.put("age", age);
-		return json;
-	}
-
 	public String getName() {
 		return name;
 	}

@@ -8,5 +8,4 @@ public interface SpaceTreeData<E extends JSONObject> {
 	void setId(String id);
 	String getName();
 	void setName(String name);
-	E getJsonData();
 }
