@@ -46,7 +46,7 @@ addon.OrgChart = zk.$extends(zul.Widget, {
 	_cmd : '',
 	_removing : false,
 	_adding : false,
-	_addNodeJson : '{"id": 1, "name": 1}',
+	_addNodeJson : '{"id": 2, "name": 2}',
 	/**
 	 * Don't use array/object as a member field, it's a restriction for ZK
 	 * object, it will work like a static , share with all the same Widget class
