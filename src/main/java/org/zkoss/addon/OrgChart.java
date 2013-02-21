@@ -57,10 +57,10 @@ public class OrgChart<E extends SpaceTreeData<?>> extends XulElement {
 				try {
 					json = _renderer.render(node);
 				} catch (AbstractMethodError ex) {
-					final Method m = _renderer.getClass()
-						.getMethod("render", new Class<?>[] {SpaceTreeNode.class});
+					final Method m = _renderer.getClass().getMethod("render",
+							new Class<?>[] { SpaceTreeNode.class });
 					m.setAccessible(true);
-					m.invoke(_renderer, new Object[] {node});
+					m.invoke(_renderer, new Object[] { node });
 				}
 			} catch (Throwable ex) {
 				throw ex;
@@ -102,13 +102,7 @@ public class OrgChart<E extends SpaceTreeData<?>> extends XulElement {
 		}
 	};
 
-	public SpaceTreeNode<E> add(SpaceTreeNode<E> childNode, String parentId) {
-		SpaceTreeNode<E> parent = find(parentId);
-		parent.add(childNode);
-		return parent;
-	}
-
-	private SpaceTreeNode<E> find(String id) {
+	public SpaceTreeNode<E> find(String id) {
 		return query(_model.getRoot(), id, new HashMap<String, Boolean>());
 	}
 
@@ -212,7 +206,8 @@ public class OrgChart<E extends SpaceTreeData<?>> extends XulElement {
 				renderTree();
 				return;
 			case TreeDataEvent.INTERVAL_ADDED:
-				SpaceTreeNode lastChild = (SpaceTreeNode) node.getChildAt(node.getChildCount() - 1);
+				SpaceTreeNode lastChild = (SpaceTreeNode) node.getChildAt(node
+						.getChildCount() - 1);
 				setAddNodeJson(getRealRenderer().render(lastChild));
 				renderTree();
 				setCmd("add");
@@ -279,12 +274,7 @@ public class OrgChart<E extends SpaceTreeData<?>> extends XulElement {
 			// return null if not found
 			return null;
 		}
-	}
 
-	public SpaceTreeNode<E> remove(String id) {
-		SpaceTreeNode<E> node = find(id);
-		node.removeFromParent();
-		return node;
 	}
 
 	private String renderChildren(Renderer renderer, SpaceTreeNode node)
