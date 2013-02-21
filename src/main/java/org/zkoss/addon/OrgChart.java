@@ -20,14 +20,63 @@ import org.zkoss.zul.impl.XulElement;
 
 public class OrgChart<E extends SpaceTreeData<?>> extends XulElement {
 
+	/** Used to render treeitem if _model is specified. */
+	private class Renderer implements java.io.Serializable {
+		private final SpaceTreeNodeRenderer _renderer;
+		private boolean _rendered, _ctrled;
+
+		private Renderer() {
+			_renderer = getRealRenderer();
+		}
+
+		private void doCatch(Throwable ex) {
+			if (_ctrled) {
+				try {
+					((RendererCtrl) _renderer).doCatch(ex);
+				} catch (Throwable t) {
+					throw UiException.Aide.wrap(t);
+				}
+			} else {
+				throw UiException.Aide.wrap(ex);
+			}
+		}
+
+		private void doFinally() {
+			if (_ctrled)
+				((RendererCtrl) _renderer).doFinally();
+		}
+
+		@SuppressWarnings("unchecked")
+		private String render(SpaceTreeNode<?> node) throws Throwable {
+			String json = null;
+			if (!_rendered && (_renderer instanceof RendererCtrl)) {
+				((RendererCtrl) _renderer).doTry();
+				_ctrled = true;
+			}
+			try {
+				try {
+					json = _renderer.render(node);
+				} catch (AbstractMethodError ex) {
+					final Method m = _renderer.getClass()
+						.getMethod("render", new Class<?>[] {SpaceTreeNode.class});
+					m.setAccessible(true);
+					m.invoke(_renderer, new Object[] {node});
+				}
+			} catch (Throwable ex) {
+				throw ex;
+			}
+			_rendered = true;
+			return json;
+		}
+	}
+
+	/* Here's a simple example for how to implements a member field */
+
 	static {
 		addClientEvent(OrgChart.class, Events.ON_SELECT, CE_DUPLICATE_IGNORE
 				| CE_IMPORTANT);
 		addClientEvent(OrgChart.class, Events.ON_USER, CE_IMPORTANT);
 	}
-
-	/* Here's a simple example for how to implements a member field */
-
 	private String _align = "center";
 	private int _duration = 700;
 	private int _level = 2;
@@ -42,33 +91,6 @@ public class OrgChart<E extends SpaceTreeData<?>> extends XulElement {
 	private transient SpaceTreeNodeRenderer<?> _renderer;
 	private transient TreeDataListener _dataListener;
 	private static final String ATTR_ON_INIT_RENDER_POSTED = "org.zkoss.zul.Tree.onInitLaterPosted";
-
-	/**
-	 * Returns the renderer used to render items.
-	 */
-	private SpaceTreeNodeRenderer getRealRenderer() {
-		return _renderer != null ? _renderer : _defRend;
-	}
-
-	private void renderTree() {
-		SpaceTreeNode node = (SpaceTreeNode) _model.getRoot();
-		final Renderer renderer = new Renderer();
-		try {
-			setJson(renderChildren(renderer, node));
-		} catch (Throwable ex) {
-			renderer.doCatch(ex);
-		} finally {
-			renderer.doFinally();
-		}
-		// notify the tree when items have been rendered.
-		Events.postEvent(ZulEvents.ON_AFTER_RENDER, this, null);
-	}
-
-	private String renderChildren(Renderer renderer, SpaceTreeNode node)
-			throws Throwable {
-		return renderer.render(node);
-	}
-
 	private static final SpaceTreeNodeRenderer _defRend = new SpaceTreeNodeRenderer() {
 		@Override
 		public String render(SpaceTreeNode node) {
@@ -126,6 +148,13 @@ public class OrgChart<E extends SpaceTreeData<?>> extends XulElement {
 		return _orient;
 	}
 
+	/**
+	 * Returns the renderer used to render items.
+	 */
+	private SpaceTreeNodeRenderer getRealRenderer() {
+		return _renderer != null ? _renderer : _defRend;
+	}
+
 	public SpaceTreeNode<E> getSelectedNode() {
 		return find(_selectedNodeId);
 	}
@@ -139,6 +168,73 @@ public class OrgChart<E extends SpaceTreeData<?>> extends XulElement {
 	 */
 	public String getZclass() {
 		return (this._zclass != null ? this._zclass : "z-orgchart");
+	}
+
+	/*
+	 * Initial Tree data listener
+	 */
+	private void initDataListener() {
+		if (_dataListener == null)
+			_dataListener = new TreeDataListener() {
+				public void onChange(TreeDataEvent event) {
+					onTreeDataChange(event);
+				}
+			};
+
+		_model.addTreeDataListener(_dataListener);
+	}
+
+	/**
+	 * Handles a private event, onInitRender. It is used only for
+	 * implementation, and you rarely need to invoke it explicitly.
+	 * 
+	 * @since 6.0.0
+	 */
+	public void onInitRender() {
+		removeAttribute(ATTR_ON_INIT_RENDER_POSTED);
+		renderTree();
+	}
+
+	// -- ComponentCtrl --//
+	/**
+	 * Handles when the tree model's content changed
+	 */
+	private void onTreeDataChange(TreeDataEvent event) {
+		final int type = event.getType();
+		final int[] path = event.getPath();
+		final TreeModel tm = event.getModel();
+
+		SpaceTreeNode node = (SpaceTreeNode) event.getModel().getChild(path);
+
+		if (node != null)
+			switch (type) {
+			case TreeDataEvent.STRUCTURE_CHANGED:
+				renderTree();
+				return;
+			case TreeDataEvent.INTERVAL_ADDED:
+				SpaceTreeNode lastChild = (SpaceTreeNode) node.getChildAt(node.getChildCount() - 1);
+				setAddNodeJson(getRealRenderer().render(lastChild));
+				renderTree();
+				setCmd("add");
+				return;
+			case TreeDataEvent.INTERVAL_REMOVED:
+				renderTree();
+				setCmd("remove");
+				return;
+			case TreeDataEvent.CONTENTS_CHANGED:
+				renderTree();
+				setCmd("refresh");
+				return;
+			}
+
+	}
+
+	private void postOnInitRender() {
+		// 20080724, Henri Chen: optimize to avoid postOnInitRender twice
+		if (getAttribute(ATTR_ON_INIT_RENDER_POSTED) == null) {
+			setAttribute(ATTR_ON_INIT_RENDER_POSTED, Boolean.TRUE);
+			Events.postEvent("onInitRender", this, null);
+		}
 	}
 
 	// graph depth-first-search algorithms
@@ -191,6 +287,11 @@ public class OrgChart<E extends SpaceTreeData<?>> extends XulElement {
 		return node;
 	}
 
+	private String renderChildren(Renderer renderer, SpaceTreeNode node)
+			throws Throwable {
+		return renderer.render(node);
+	}
+
 	// super//
 	protected void renderProperties(org.zkoss.zk.ui.sys.ContentRenderer renderer)
 			throws java.io.IOException {
@@ -215,6 +316,20 @@ public class OrgChart<E extends SpaceTreeData<?>> extends XulElement {
 		if (!Objects.equals(_addNodeJson, "{}"))
 			render(renderer, "addNodeJson", _addNodeJson);
 
+	}
+
+	private void renderTree() {
+		SpaceTreeNode node = (SpaceTreeNode) _model.getRoot();
+		final Renderer renderer = new Renderer();
+		try {
+			setJson(renderChildren(renderer, node));
+		} catch (Throwable ex) {
+			renderer.doCatch(ex);
+		} finally {
+			renderer.doFinally();
+		}
+		// notify the tree when items have been rendered.
+		Events.postEvent(ZulEvents.ON_AFTER_RENDER, this, null);
 	}
 
 	public void service(AuRequest request, boolean everError) {
@@ -297,123 +412,6 @@ public class OrgChart<E extends SpaceTreeData<?>> extends XulElement {
 		} else if (_model != null) {
 			_model.removeTreeDataListener(_dataListener);
 			_model = null;
-		}
-	}
-
-	/**
-	 * Handles a private event, onInitRender. It is used only for
-	 * implementation, and you rarely need to invoke it explicitly.
-	 * 
-	 * @since 6.0.0
-	 */
-	public void onInitRender() {
-		removeAttribute(ATTR_ON_INIT_RENDER_POSTED);
-		renderTree();
-	}
-
-	private void postOnInitRender() {
-		// 20080724, Henri Chen: optimize to avoid postOnInitRender twice
-		if (getAttribute(ATTR_ON_INIT_RENDER_POSTED) == null) {
-			setAttribute(ATTR_ON_INIT_RENDER_POSTED, Boolean.TRUE);
-			Events.postEvent("onInitRender", this, null);
-		}
-	}
-
-	/*
-	 * Initial Tree data listener
-	 */
-	private void initDataListener() {
-		if (_dataListener == null)
-			_dataListener = new TreeDataListener() {
-				public void onChange(TreeDataEvent event) {
-					onTreeDataChange(event);
-				}
-			};
-
-		_model.addTreeDataListener(_dataListener);
-	}
-
-	// -- ComponentCtrl --//
-	/**
-	 * Handles when the tree model's content changed
-	 */
-	private void onTreeDataChange(TreeDataEvent event) {
-		final int type = event.getType();
-		final int[] path = event.getPath();
-		final TreeModel tm = event.getModel();
-
-		SpaceTreeNode node = (SpaceTreeNode) event.getModel().getChild(path);
-
-		if (node != null)
-			switch (type) {
-			case TreeDataEvent.STRUCTURE_CHANGED:
-				renderTree();
-				return;
-			case TreeDataEvent.INTERVAL_ADDED:
-				SpaceTreeNode lastChild = (SpaceTreeNode) node.getChildAt(node.getChildCount() - 1);
-				setAddNodeJson(getRealRenderer().render(lastChild));
-				renderTree();
-				setCmd("add");
-				return;
-			case TreeDataEvent.INTERVAL_REMOVED:
-				renderTree();
-				setCmd("remove");
-				return;
-			case TreeDataEvent.CONTENTS_CHANGED:
-				renderTree();
-				setCmd("refresh");
-				return;
-			}
-
-	}
-
-	/** Used to render treeitem if _model is specified. */
-	private class Renderer implements java.io.Serializable {
-		private final SpaceTreeNodeRenderer _renderer;
-		private boolean _rendered, _ctrled;
-
-		private Renderer() {
-			_renderer = getRealRenderer();
-		}
-
-		@SuppressWarnings("unchecked")
-		private String render(SpaceTreeNode<?> node) throws Throwable {
-			String json = null;
-			if (!_rendered && (_renderer instanceof RendererCtrl)) {
-				((RendererCtrl) _renderer).doTry();
-				_ctrled = true;
-			}
-			try {
-				try {
-					json = _renderer.render(node);
-				} catch (AbstractMethodError ex) {
-					final Method m = _renderer.getClass()
-						.getMethod("render", new Class<?>[] {SpaceTreeNode.class});
-					m.setAccessible(true);
-					m.invoke(_renderer, new Object[] {node});
-				}
-			} catch (Throwable ex) {
-				throw ex;
-			}
-			_rendered = true;
-			return json;
-		}
-
-		private void doCatch(Throwable ex) {
-			if (_ctrled) {
-				try {
-					((RendererCtrl) _renderer).doCatch(ex);
-				} catch (Throwable t) {
-					throw UiException.Aide.wrap(t);
-				}
-			} else {
-				throw UiException.Aide.wrap(ex);
-			}
-		}
-
-		private void doFinally() {
-			if (_ctrled)
-				((RendererCtrl) _renderer).doFinally();
 		}
 	}
 
