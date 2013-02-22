@@ -38,9 +38,11 @@ public class SpaceTreeComposer extends SelectorComposer<Window> {
 		sapcetreeRootChildren.add(first);
 		sapcetreeRootChildren.add(second);
 		SpaceTreeNode<?> spacetreeRoot = new SpaceTreeNode(new UserDataBean("0", "Peter", 0), sapcetreeRootChildren);
+		
 		List<SpaceTreeNode<?>> rootChild = new ArrayList<SpaceTreeNode<?>>();
 		rootChild.add(spacetreeRoot);
 		SpaceTreeNode<?> root = new SpaceTreeNode(null, rootChild);
+		
 		SpaceTreeModel model = new SpaceTreeModel(root);
 		myComp.setModel(model);
 	}
