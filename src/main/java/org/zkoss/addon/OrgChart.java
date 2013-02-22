@@ -1,7 +1,6 @@
 package org.zkoss.addon;
 
 import java.lang.reflect.Method;
-import java.util.HashMap;
 import java.util.Map;
 
 import org.zkoss.json.JSONObject;
@@ -105,8 +104,7 @@ public class OrgChart<E extends SpaceTreeData<?>> extends XulElement {
 	};
 
 	public SpaceTreeNode<E> find(String id) {
-		return query((TreeNode<E>) _model.getRoot(), id,
-				new HashMap<String, Boolean>());
+		return _model.find(id);
 	}
 
 	public String getAddNodeJson() {
@@ -238,50 +236,6 @@ public class OrgChart<E extends SpaceTreeData<?>> extends XulElement {
 		}
 	}
 
-	// graph depth-first-search algorithms
-	private SpaceTreeNode<E> query(TreeNode<E> node, String id,
-			Map<String, Boolean> checked) {
-
-		// check children
-		for (TreeNode<E> rawChild : node.getChildren()) {
-			SpaceTreeNode<E> child = (SpaceTreeNode<E>) rawChild;
-			String childId = child.getId();
-
-			if (checked.get(childId) != null) {
-				// if it checked, then skip
-				continue;
-			} else if (child.hasChildren()) {
-				// check its children
-				return query(child, id, checked);
-			} else {
-				// check leaf node id
-				if (childId.equals(id)) {
-					return child;
-				} else {
-					checked.put(childId, true);
-				}
-			}
-		}
-
-		// check itself after all children is checked
-		SpaceTreeNode<E> thisNode = (SpaceTreeNode<E>) node;
-		if (thisNode.getId().equals(id)) {
-			return (SpaceTreeNode<E>) node;
-		} else {
-			checked.put(thisNode.getId(), true);
-		}
-
-		TreeNode<E> parent = thisNode.getParent();
-		if (parent != null) {
-			// check bother if parent exists
-			return query(parent, id, checked);
-		} else {
-			// return null if not found
-			return null;
-		}
-
-	}
-
 	private String renderChildren(Renderer renderer, SpaceTreeNode<E> node)
 			throws Throwable {
 		return renderer.render(node);
@@ -328,9 +282,9 @@ public class OrgChart<E extends SpaceTreeData<?>> extends XulElement {
 	}
 
 	/**
-	 * After remove(child) is completed in client, the selected node should be the parent node.
-	 * In this moment, onSelect event should not be trigger, 
-	 * so we have to replace onSelect event with onUser event.
+	 * After remove(child) is completed in client, the selected node should be
+	 * the parent node. In this moment, onSelect event should not be trigger, so
+	 * we have to replace onSelect event with onUser event.
 	 */
 	public void service(AuRequest request, boolean everError) {
 		final String cmd = request.getCommand();
