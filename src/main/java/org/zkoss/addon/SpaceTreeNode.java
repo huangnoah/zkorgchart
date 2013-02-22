@@ -12,7 +12,6 @@ import org.zkoss.zul.DefaultTreeNode;
 public class SpaceTreeNode<E extends SpaceTreeData<?>> extends
 		DefaultTreeNode<E> implements JSONAware {
 
-
 	public SpaceTreeNode(E data, Collection<? extends SpaceTreeNode<E>> children) {
 		super(data, children);
 	}
@@ -39,17 +38,18 @@ public class SpaceTreeNode<E extends SpaceTreeData<?>> extends
 		json.put("id", getId());
 		json.put("name", getName());
 		E dataObj = getData();
-		
-		List<Field> fields = Arrays.asList(dataObj.getClass().getDeclaredFields());
+
+		List<Field> fields = Arrays.asList(dataObj.getClass()
+				.getDeclaredFields());
 		JSONObject props = new JSONObject();
 		String name = null;
-		
+
 		for (Field field : fields) {
 			name = field.getName();
-			if("id".equals(name) || "name".equals(name)){
+			if ("id".equals(name) || "name".equals(name)) {
 				continue;
 			}
-			
+
 			field.setAccessible(true);
 			try {
 				props.put(name, field.get(dataObj));
@@ -61,9 +61,10 @@ public class SpaceTreeNode<E extends SpaceTreeData<?>> extends
 				field.setAccessible(false);
 			}
 		}
-		
+
 		json.put("data", props);
 		json.put("children", getChildren());
 		return json.toJSONString();
 	}
+
 }
