@@ -327,6 +327,11 @@ public class OrgChart<E extends SpaceTreeData<?>> extends XulElement {
 		Events.postEvent(ZulEvents.ON_AFTER_RENDER, this, null);
 	}
 
+	/**
+	 * After remove(child) is completed in client, the selected node should be the parent node.
+	 * In this moment, onSelect event should not be trigger, 
+	 * so we have to replace onSelect event with onUser event.
+	 */
 	public void service(AuRequest request, boolean everError) {
 		final String cmd = request.getCommand();
 		SelectEvent evt = SelectEvent.getSelectEvent(request);
