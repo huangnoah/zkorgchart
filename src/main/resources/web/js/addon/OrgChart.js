@@ -125,11 +125,7 @@ addon.OrgChart = zk.$extends(zul.Widget, {
 
 	setCmd : function(val) {
 		var component = this;
-		if (val === 'add' || val === 'remove' || val === 'refresh')
-			this._cmd = val;
-		else {
-			this._cmd = '';
-		}
+		this._cmd = val;
 		if (this.desktop) { // update the UI here.
 			if (this._cmd === 'remove') {
 				this.remove(jq.evalJSON(this._selectedNode));
@@ -158,10 +154,10 @@ addon.OrgChart = zk.$extends(zul.Widget, {
 						var parentNodeStr = JSON.stringify(parentNode)
 						component._removing = false;
 						component._selectedNode = parentNodeStr;
+						component._json = JSON.stringify(component._st.toJSON("tree"));
 						component.fire('onUser', {
 							selectedNode : parentNodeStr
 						});
-						
 					}
 				});
 			}
@@ -185,7 +181,7 @@ addon.OrgChart = zk.$extends(zul.Widget, {
 						component._st.select(parentid);
 						component._st.refresh();
 					}
-					
+					component._json = JSON.stringify(component._st.toJSON("tree"));
 				}
 			});
 		}

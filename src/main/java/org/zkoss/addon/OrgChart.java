@@ -205,19 +205,16 @@ public class OrgChart<E extends SpaceTreeData<?>> extends XulElement {
 
 		if (node != null)
 			switch (type) {
-			case TreeDataEvent.STRUCTURE_CHANGED:
-				renderTree();
-				return;
 			case TreeDataEvent.INTERVAL_ADDED:
 				SpaceTreeNode<E> lastChild = (SpaceTreeNode<E>) node
 						.getChildAt(node.getChildCount() - 1);
 				setAddNodeJson(getRealRenderer().render(lastChild));
-				renderTree();
+				setJsonWithoutUpdate();
 				setCmd("add");
 				return;
 			case TreeDataEvent.INTERVAL_REMOVED:
 				_model.addToSelection(node);
-				renderTree();
+				setJsonWithoutUpdate();
 				setCmd("remove");
 				return;
 			case TreeDataEvent.CONTENTS_CHANGED:
@@ -226,6 +223,19 @@ public class OrgChart<E extends SpaceTreeData<?>> extends XulElement {
 				return;
 			}
 
+	}
+
+	private void setJsonWithoutUpdate() {
+		SpaceTreeNode<E> spacetreeRoot = (SpaceTreeNode<E>) _model
+				.getSpaceTreeRoot();
+		final Renderer renderer = new Renderer();
+		try {
+			_json = renderChildren(renderer, spacetreeRoot);
+		} catch (Throwable ex) {
+			renderer.doCatch(ex);
+		} finally {
+			renderer.doFinally();
+		}
 	}
 
 	private void postOnInitRender() {
@@ -320,7 +330,9 @@ public class OrgChart<E extends SpaceTreeData<?>> extends XulElement {
 	}
 
 	public void setCmd(String cmd) {
-		if (!Objects.equals(_cmd, cmd)) {
+		if (!Objects.equals(_cmd, cmd)
+				&& ("add".equals(cmd) || "remove".equals(cmd) || "refresh"
+						.equals(cmd))) {
 			_cmd = cmd;
 		}
 		smartUpdate("cmd", _cmd);
