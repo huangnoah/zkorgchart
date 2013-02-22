@@ -23,7 +23,7 @@ public class OrgChart<E extends SpaceTreeData> extends XulElement {
 
 	/** Used to render treeitem if _model is specified. */
 	private class Renderer implements java.io.Serializable {
-		private final SpaceTreeNodeRenderer _renderer;
+		private final SpaceTreeNodeRenderer<E> _renderer;
 		private boolean _rendered, _ctrled;
 
 		private Renderer() {
@@ -48,7 +48,7 @@ public class OrgChart<E extends SpaceTreeData> extends XulElement {
 		}
 
 		@SuppressWarnings("unchecked")
-		private String render(SpaceTreeNode<?> node) throws Throwable {
+		private String render(SpaceTreeNode<E> node) throws Throwable {
 			String json = null;
 			if (!_rendered && (_renderer instanceof RendererCtrl)) {
 				((RendererCtrl) _renderer).doTry();
@@ -89,7 +89,7 @@ public class OrgChart<E extends SpaceTreeData> extends XulElement {
 	private String _cmd = "";
 	private String _addNodeJson = "{}";
 	private boolean init = true;
-	private transient SpaceTreeNodeRenderer<?> _renderer;
+	private transient SpaceTreeNodeRenderer<E> _renderer;
 	private transient TreeDataListener _dataListener;
 	private static final String ATTR_ON_INIT_RENDER_POSTED = "org.zkoss.zul.Tree.onInitLaterPosted";
 	private static final SpaceTreeNodeRenderer _defRend = new SpaceTreeNodeRenderer() {
@@ -360,7 +360,7 @@ public class OrgChart<E extends SpaceTreeData> extends XulElement {
 	}
 
 	@SuppressWarnings("unchecked")
-	public void setModel(SpaceTreeModel<?> model) {
+	public void setModel(SpaceTreeModel<E> model) {
 		if (model != null) {
 			if (!(model instanceof SpaceTreeModel))
 				throw new UiException(model.getClass() + " must implement "
