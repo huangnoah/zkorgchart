@@ -95,7 +95,12 @@ addon.OrgChart = zk.$extends(zul.Widget, {
 				component._st.switchAlignment(this._align, "replot");
 			}
 		},
-
+		json : function(val) {
+			this._oriJson = this._json;
+			this._json = val;
+			if (this.desktop) {
+			}
+		},
 	},
 	/**
 	 * If you don't like the way in $define , you could do the setter/getter by
@@ -108,29 +113,20 @@ addon.OrgChart = zk.$extends(zul.Widget, {
 	 * getText:function(){ return this._text; }, setText:function(val){
 	 * this._text = val; if(this.desktop){ //update the UI here. } },
 	 */
-	getJson : function() {
-		return this._json;
-	},
-
-	setJson : function(val) {
-		this._oriJson = this._json;
-		this._json = val;
-		if (this.desktop) {
-		}
-	},
 
 	getCmd : function() {
 		return this._cmd;
 	},
 
+	// it will not setCmd("add") at second time if uses coding sugar 
 	setCmd : function(val) {
 		var component = this;
 		this._cmd = val;
 		if (this.desktop) { // update the UI here.
 			if (this._cmd === 'remove') {
-				this.remove(jq.evalJSON(this._selectedNode));
+				this.remove_(jq.evalJSON(this._selectedNode));
 			} else if (this._cmd === 'add') {
-				this.add(this._addNodeJson, jq.evalJSON(this._selectedNode));
+				this.add_(this._addNodeJson, jq.evalJSON(this._selectedNode));
 			} else if (this._cmd === 'refresh') {
 				component._st.loadJSON(jq.evalJSON(this._json));
 				component._st.refresh();
@@ -138,7 +134,7 @@ addon.OrgChart = zk.$extends(zul.Widget, {
 		}
 	},
 
-	remove : function(node) {
+	remove_ : function(node) {
 		var component = this;
 		var nodeid = node["id"];
 		var oriJson = jq.evalJSON(component._oriJson);
@@ -150,7 +146,7 @@ addon.OrgChart = zk.$extends(zul.Widget, {
 				component._st.removeSubtree(nodeid, true, 'animate', {
 					hideLabels : false,
 					onComplete : function() {
-						var parentNode = component.getSubTree(parent["id"])
+						var parentNode = component.getSubTree_(parent["id"])
 						var parentNodeStr = JSON.stringify(parentNode)
 						component._removing = false;
 						component._selectedNode = parentNodeStr;
@@ -164,7 +160,7 @@ addon.OrgChart = zk.$extends(zul.Widget, {
 		}
 	},
 
-	add : function(nodeJson, parent) {
+	add_ : function(nodeJson, parent) {
 		var component = this;
 		var parentid = parent["id"];
 		if (!component._adding) {
@@ -187,7 +183,7 @@ addon.OrgChart = zk.$extends(zul.Widget, {
 		}
 	},
 	
-	getSubTree : function(nodeid) {
+	getSubTree_ : function(nodeid) {
 		var component = this;
 		return $jit.json.getSubtree(jq.evalJSON(component._json), nodeid);
 	},
@@ -311,7 +307,7 @@ addon.OrgChart = zk.$extends(zul.Widget, {
 					component._st.onClick(node.id, {
 						onComplete : function() {
 							if (node) {
-								var selNode = component.getSubTree(node.id);
+								var selNode = component.getSubTree_(node.id);
 								component.fire('onSelect', {
 									selectedNode : selNode
 								});
