@@ -4,12 +4,13 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.zkoss.json.JSONObject;
+import org.zkoss.json.JSONValue;
 import org.zkoss.lang.Objects;
 import org.zkoss.zk.au.AuRequest;
 import org.zkoss.zk.ui.UiException;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zk.ui.event.SelectEvent;
-import org.zkoss.zul.DefaultTreeModel;
 import org.zkoss.zul.RendererCtrl;
 import org.zkoss.zul.TreeModel;
 import org.zkoss.zul.TreeNode;
@@ -18,6 +19,7 @@ import org.zkoss.zul.event.TreeDataListener;
 import org.zkoss.zul.event.ZulEvents;
 import org.zkoss.zul.impl.XulElement;
 
+@SuppressWarnings("serial")
 public class OrgChart<E extends SpaceTreeData<?>> extends XulElement {
 
 	/** Used to render treeitem if _model is specified. */
@@ -82,9 +84,9 @@ public class OrgChart<E extends SpaceTreeData<?>> extends XulElement {
 	private int _level = 2;
 	private String _nodetype = "rectangle";
 	private String _orient = "left";
-	private DefaultTreeModel<E> _model;
+	private SpaceTreeModel<E> _model;
 	private String _json = "{}";
-	private String _selectedNodeId;
+	private SpaceTreeNode<E> _sel = null;
 	private String _cmd = "";
 	private String _addNodeJson = "{}";
 	private boolean init = true;
@@ -103,7 +105,8 @@ public class OrgChart<E extends SpaceTreeData<?>> extends XulElement {
 	};
 
 	public SpaceTreeNode<E> find(String id) {
-		return query(_model.getRoot(), id, new HashMap<String, Boolean>());
+		return query((TreeNode<E>) _model.getRoot(), id,
+				new HashMap<String, Boolean>());
 	}
 
 	public String getAddNodeJson() {
@@ -130,7 +133,7 @@ public class OrgChart<E extends SpaceTreeData<?>> extends XulElement {
 		return _level;
 	}
 
-	public DefaultTreeModel getModel() {
+	public SpaceTreeModel<E> getModel() {
 		return _model;
 	}
 
@@ -150,11 +153,7 @@ public class OrgChart<E extends SpaceTreeData<?>> extends XulElement {
 	}
 
 	public SpaceTreeNode<E> getSelectedNode() {
-		return find(_selectedNodeId);
-	}
-
-	public String getSelectedNodeId() {
-		return _selectedNodeId;
+		return _sel;
 	}
 
 	/**
@@ -193,12 +192,18 @@ public class OrgChart<E extends SpaceTreeData<?>> extends XulElement {
 	/**
 	 * Handles when the tree model's content changed
 	 */
+	@SuppressWarnings("unchecked")
 	private void onTreeDataChange(TreeDataEvent event) {
 		final int type = event.getType();
 		final int[] path = event.getPath();
-		final TreeModel tm = event.getModel();
+		final TreeModel<E> tm = event.getModel();
 
-		SpaceTreeNode node = (SpaceTreeNode) event.getModel().getChild(path);
+		SpaceTreeNode<E> node = null;
+		if (path == null) {
+			node = (SpaceTreeNode<E>) _model.getSpaceTreeRoot();
+		} else {
+			node = (SpaceTreeNode<E>) event.getModel().getChild(path);
+		}
 
 		if (node != null)
 			switch (type) {
@@ -206,13 +211,14 @@ public class OrgChart<E extends SpaceTreeData<?>> extends XulElement {
 				renderTree();
 				return;
 			case TreeDataEvent.INTERVAL_ADDED:
-				SpaceTreeNode lastChild = (SpaceTreeNode) node.getChildAt(node
-						.getChildCount() - 1);
+				SpaceTreeNode<E> lastChild = (SpaceTreeNode<E>) node
+						.getChildAt(node.getChildCount() - 1);
 				setAddNodeJson(getRealRenderer().render(lastChild));
 				renderTree();
 				setCmd("add");
 				return;
 			case TreeDataEvent.INTERVAL_REMOVED:
+				_model.addToSelection(node);
 				renderTree();
 				setCmd("remove");
 				return;
@@ -233,7 +239,6 @@ public class OrgChart<E extends SpaceTreeData<?>> extends XulElement {
 	}
 
 	// graph depth-first-search algorithms
-	@SuppressWarnings("unchecked")
 	private SpaceTreeNode<E> query(TreeNode<E> node, String id,
 			Map<String, Boolean> checked) {
 
@@ -277,7 +282,7 @@ public class OrgChart<E extends SpaceTreeData<?>> extends XulElement {
 
 	}
 
-	private String renderChildren(Renderer renderer, SpaceTreeNode node)
+	private String renderChildren(Renderer renderer, SpaceTreeNode<E> node)
 			throws Throwable {
 		return renderer.render(node);
 	}
@@ -301,15 +306,15 @@ public class OrgChart<E extends SpaceTreeData<?>> extends XulElement {
 			render(renderer, "json", _json);
 		if (!Objects.equals(_cmd, ""))
 			render(renderer, "cmd", _cmd);
-		if (!Objects.equals(_selectedNodeId, ""))
-			render(renderer, "selectedNodeId", _selectedNodeId);
+		if (!Objects.equals(_sel, ""))
+			render(renderer, "selectedNode", _sel);
 		if (!Objects.equals(_addNodeJson, "{}"))
 			render(renderer, "addNodeJson", _addNodeJson);
 
 	}
 
 	private void renderTree() {
-		SpaceTreeNode node = (SpaceTreeNode) _model.getRoot();
+		SpaceTreeNode<E> node = (SpaceTreeNode<E>) _model.getSpaceTreeRoot();
 		final Renderer renderer = new Renderer();
 		try {
 			setJson(renderChildren(renderer, node));
@@ -327,8 +332,13 @@ public class OrgChart<E extends SpaceTreeData<?>> extends XulElement {
 		SelectEvent evt = SelectEvent.getSelectEvent(request);
 		Map data = request.getData();
 
-		if (Events.ON_SELECT.equals(cmd) || Events.ON_USER.equals(cmd)) {
-			setSelectedNodeId(data.get("selectedNodeId").toString());
+		boolean isOnSelect = Events.ON_SELECT.equals(cmd);
+		if (isOnSelect || Events.ON_USER.equals(cmd)) {
+			String seldNodeStr = data.get("selectedNode").toString();
+			JSONObject json = (JSONObject) JSONValue.parse(seldNodeStr);
+			SpaceTreeNode<E> seldNode = find(json.get("id").toString());
+			_model.addToSelection(seldNode);
+			setSelectedNode(seldNode);
 			Events.postEvent(evt);
 		} else {
 			super.service(request, everError);
@@ -379,23 +389,31 @@ public class OrgChart<E extends SpaceTreeData<?>> extends XulElement {
 		}
 	}
 
-	public void setModel(DefaultTreeModel model) {
-		if (init) {
-			setSelectedNodeId(((SpaceTreeNode) model.getRoot()).getId());
-			init = false;
-		}
-
+	@SuppressWarnings("unchecked")
+	public void setModel(SpaceTreeModel<?> model) {
 		if (model != null) {
-			if (!(model instanceof DefaultTreeModel))
+			if (!(model instanceof SpaceTreeModel))
 				throw new UiException(model.getClass() + " must implement "
-						+ DefaultTreeModel.class);
+						+ SpaceTreeModel.class);
 
+			SpaceTreeNode<E> root = (SpaceTreeNode<E>) model.getRoot();
+			SpaceTreeNode<E> spacetreeRoot = model.getSpaceTreeRoot();
+			if (init) {
+				setSelectedNode(spacetreeRoot);
+				init = false;
+			}
 			if (_model != model) {
 				if (_model != null) {
 					_model.removeTreeDataListener(_dataListener);
 				}
-
-				_model = model;
+				// to ensure root should be unique
+				for (TreeNode<E> child : root.getChildren()) {
+					if (spacetreeRoot == child) {
+						continue;
+					}
+					root.remove(child);
+				}
+				_model = (SpaceTreeModel<E>) model;
 				initDataListener();
 			}
 			postOnInitRender();
@@ -421,10 +439,10 @@ public class OrgChart<E extends SpaceTreeData<?>> extends XulElement {
 		}
 	}
 
-	public void setSelectedNodeId(String selectedNodeId) {
-		if (!Objects.equals(_selectedNodeId, selectedNodeId)) {
-			_selectedNodeId = selectedNodeId;
-			smartUpdate("selectedNodeId", _selectedNodeId);
+	public void setSelectedNode(SpaceTreeNode<E> sel) {
+		if (!Objects.equals(_sel, sel)) {
+			_sel = sel;
+			smartUpdate("selectedNode", _sel.toJSONString());
 		}
 	}
 }

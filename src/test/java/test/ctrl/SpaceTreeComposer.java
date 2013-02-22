@@ -4,12 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.zkoss.addon.OrgChart;
+import org.zkoss.addon.SpaceTreeModel;
 import org.zkoss.addon.SpaceTreeNode;
 import org.zkoss.model.UserDataBean;
 import org.zkoss.zk.ui.select.SelectorComposer;
 import org.zkoss.zk.ui.select.annotation.Listen;
 import org.zkoss.zk.ui.select.annotation.Wire;
-import org.zkoss.zul.DefaultTreeModel;
 import org.zkoss.zul.Window;
 
 public class SpaceTreeComposer extends SelectorComposer<Window> {
@@ -34,12 +34,14 @@ public class SpaceTreeComposer extends SelectorComposer<Window> {
 		secondChildren.add(new SpaceTreeNode(new UserDataBean("23", "Tim", 23), null));
 		SpaceTreeNode<?> second = new SpaceTreeNode(new UserDataBean("2", "Partick", 23), secondChildren);
 		
-		List<SpaceTreeNode<?>> rootChildren = new ArrayList<SpaceTreeNode<?>>();
-		rootChildren.add(first);
-		rootChildren.add(second);
-		SpaceTreeNode<?> root = new SpaceTreeNode(new UserDataBean("0", "Peter", 0), rootChildren);
-		
-		DefaultTreeModel model = new DefaultTreeModel(root);
+		List<SpaceTreeNode<?>> sapcetreeRootChildren = new ArrayList<SpaceTreeNode<?>>();
+		sapcetreeRootChildren.add(first);
+		sapcetreeRootChildren.add(second);
+		SpaceTreeNode<?> spacetreeRoot = new SpaceTreeNode(new UserDataBean("0", "Peter", 0), sapcetreeRootChildren);
+		List<SpaceTreeNode<?>> rootChild = new ArrayList<SpaceTreeNode<?>>();
+		rootChild.add(spacetreeRoot);
+		SpaceTreeNode<?> root = new SpaceTreeNode(null, rootChild);
+		SpaceTreeModel model = new SpaceTreeModel(root);
 		myComp.setModel(model);
 	}
 	

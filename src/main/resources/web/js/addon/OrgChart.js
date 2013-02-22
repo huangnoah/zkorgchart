@@ -42,7 +42,7 @@ addon.OrgChart = zk.$extends(zul.Widget, {
 	_oriJson : '',
 	_json : '{"id": 1, "name": 1}',
 	_st : '',
-	_selectedNodeId : '',
+	_selectedNode : '{}',
 	_cmd : '',
 	_removing : false,
 	_adding : false,
@@ -69,7 +69,7 @@ addon.OrgChart = zk.$extends(zul.Widget, {
 		 * It's more clear.
 		 * 
 		 */
-		selectedNodeId : _zkf = function() {
+		selectedNode : _zkf = function() {
 			if (this.desktop) {
 			}
 		},
@@ -132,9 +132,9 @@ addon.OrgChart = zk.$extends(zul.Widget, {
 		}
 		if (this.desktop) { // update the UI here.
 			if (this._cmd === 'remove') {
-				this.remove(this._selectedNodeId);
+				this.remove(jq.evalJSON(this._selectedNode));
 			} else if (this._cmd === 'add') {
-				this.add(this._addNodeJson, this._selectedNodeId);
+				this.add(this._addNodeJson, jq.evalJSON(this._selectedNode));
 			} else if (this._cmd === 'refresh') {
 				component._st.loadJSON(jq.evalJSON(this._json));
 				component._st.refresh();
@@ -142,8 +142,9 @@ addon.OrgChart = zk.$extends(zul.Widget, {
 		}
 	},
 
-	remove : function(nodeid) {
+	remove : function(node) {
 		var component = this;
+		var nodeid = node["id"];
 		var oriJson = jq.evalJSON(component._oriJson);
 		var isRoot = (nodeid === oriJson["id"]);
 		if (!isRoot) {
@@ -153,36 +154,46 @@ addon.OrgChart = zk.$extends(zul.Widget, {
 				component._st.removeSubtree(nodeid, true, 'animate', {
 					hideLabels : false,
 					onComplete : function() {
+						var parentNode = component.getSubTree(parent["id"])
+						var parentNodeStr = JSON.stringify(parentNode)
 						component._removing = false;
-						component._selectedNodeId = parent.id;
+						component._selectedNode = parentNodeStr;
 						component.fire('onUser', {
-							selectedNodeId : parent.id
+							selectedNode : parentNodeStr
 						});
+						
 					}
 				});
 			}
 		}
 	},
 
-	add : function(nodeJson, parentId) {
+	add : function(nodeJson, parent) {
 		var component = this;
+		var parentid = parent["id"];
 		if (!component._adding) {
 			component._adding = true;
 			component._st.addSubtree({
-				id : parentId,
+				id : parentid,
 				children : [ jq.evalJSON(nodeJson) ]
 			}, 'animate', {
 				hideLabels : false,
 				onComplete : function() {
 					component._adding = false;
 					var oriJson = jq.evalJSON(component._oriJson)
-					if (parentId === oriJson["id"]) {
-						component._st.select(parentId);
+					if (parentid === oriJson["id"]) {
+						component._st.select(parentid);
 						component._st.refresh();
 					}
+					
 				}
 			});
 		}
+	},
+	
+	getSubTree : function(nodeid) {
+		var component = this;
+		return $jit.json.getSubtree(jq.evalJSON(component._json), nodeid);
 	},
 
 	bind_ : function() {
@@ -304,8 +315,9 @@ addon.OrgChart = zk.$extends(zul.Widget, {
 					component._st.onClick(node.id, {
 						onComplete : function() {
 							if (node) {
+								var selNode = component.getSubTree(node.id);
 								component.fire('onSelect', {
-									selectedNodeId : node.id
+									selectedNode : selNode
 								});
 							}
 						}
