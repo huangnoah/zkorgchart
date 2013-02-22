@@ -332,8 +332,7 @@ public class OrgChart<E extends SpaceTreeData<?>> extends XulElement {
 		SelectEvent evt = SelectEvent.getSelectEvent(request);
 		Map data = request.getData();
 
-		boolean isOnSelect = Events.ON_SELECT.equals(cmd);
-		if (isOnSelect || Events.ON_USER.equals(cmd)) {
+		if (Events.ON_SELECT.equals(cmd) || Events.ON_USER.equals(cmd)) {
 			String seldNodeStr = data.get("selectedNode").toString();
 			JSONObject json = (JSONObject) JSONValue.parse(seldNodeStr);
 			SpaceTreeNode<E> seldNode = find(json.get("id").toString());
