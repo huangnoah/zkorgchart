@@ -1,8 +1,6 @@
 package org.zkoss.addon;
 
-import org.zkoss.json.JSONObject;
-
-public interface SpaceTreeData<E extends JSONObject> {
+public interface SpaceTreeData {
 
 	String getId();
 	void setId(String id);

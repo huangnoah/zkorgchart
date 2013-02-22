@@ -9,10 +9,10 @@ import org.zkoss.json.JSONAware;
 import org.zkoss.json.JSONObject;
 import org.zkoss.zul.DefaultTreeNode;
 
-public class SpaceTreeNode<E extends SpaceTreeData<?>> extends
+public class SpaceTreeNode<E extends SpaceTreeData> extends
 		DefaultTreeNode<E> implements JSONAware {
 
-	public SpaceTreeNode(E data, Collection<? extends SpaceTreeNode<E>> children) {
+	public SpaceTreeNode(E data, Collection<SpaceTreeNode<E>> children) {
 		super(data, children);
 	}
 

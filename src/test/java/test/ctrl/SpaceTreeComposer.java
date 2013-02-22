@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.zkoss.addon.OrgChart;
+import org.zkoss.addon.SpaceTreeData;
 import org.zkoss.addon.SpaceTreeModel;
 import org.zkoss.addon.SpaceTreeNode;
 import org.zkoss.model.UserDataBean;
@@ -12,51 +13,51 @@ import org.zkoss.zk.ui.select.annotation.Listen;
 import org.zkoss.zk.ui.select.annotation.Wire;
 import org.zkoss.zul.Window;
 
-public class SpaceTreeComposer extends SelectorComposer<Window> {
+public class SpaceTreeComposer<E extends SpaceTreeData> extends SelectorComposer<Window> {
 
 	@Wire("#myComp")
-	private OrgChart<?> myComp;
+	private OrgChart<E> myComp;
 	
 	public static int conut = 50;
 	
 	public void doAfterCompose(Window comp) throws Exception {
 		super.doAfterCompose(comp);
 		
-		List<SpaceTreeNode<?>> firstChildren = new ArrayList<SpaceTreeNode<?>>();
+		List<SpaceTreeNode<E>> firstChildren = new ArrayList<SpaceTreeNode<E>>();
 		firstChildren.add(new SpaceTreeNode(new UserDataBean("11", "Jack", 11), null));
 		firstChildren.add(new SpaceTreeNode(new UserDataBean("12", "Mary", 12), null));
 		firstChildren.add(new SpaceTreeNode(new UserDataBean("13", "Jean", 13), null));
-		SpaceTreeNode<?> first = new SpaceTreeNode(new UserDataBean("1", "Jason", 1), firstChildren);
+		SpaceTreeNode<E> first = new SpaceTreeNode(new UserDataBean("1", "Jason", 1), firstChildren);
 		
-		List<SpaceTreeNode<?>> secondChildren = new ArrayList<SpaceTreeNode<?>>();
+		List<SpaceTreeNode<E>> secondChildren = new ArrayList<SpaceTreeNode<E>>();
 		secondChildren.add(new SpaceTreeNode(new UserDataBean("21", "Sam", 21), null));
 		secondChildren.add(new SpaceTreeNode(new UserDataBean("22", "Tom", 22), null));
 		secondChildren.add(new SpaceTreeNode(new UserDataBean("23", "Tim", 23), null));
-		SpaceTreeNode<?> second = new SpaceTreeNode(new UserDataBean("2", "Partick", 23), secondChildren);
+		SpaceTreeNode<E> second = new SpaceTreeNode(new UserDataBean("2", "Partick", 23), secondChildren);
 		
-		List<SpaceTreeNode<?>> sapcetreeRootChildren = new ArrayList<SpaceTreeNode<?>>();
+		List<SpaceTreeNode<E>> sapcetreeRootChildren = new ArrayList<SpaceTreeNode<E>>();
 		sapcetreeRootChildren.add(first);
 		sapcetreeRootChildren.add(second);
-		SpaceTreeNode<?> spacetreeRoot = new SpaceTreeNode(new UserDataBean("0", "Peter", 0), sapcetreeRootChildren);
+		SpaceTreeNode<E> spacetreeRoot = new SpaceTreeNode(new UserDataBean("0", "Peter", 0), sapcetreeRootChildren);
 		
-		List<SpaceTreeNode<?>> rootChild = new ArrayList<SpaceTreeNode<?>>();
+		List<SpaceTreeNode<E>> rootChild = new ArrayList<SpaceTreeNode<E>>();
 		rootChild.add(spacetreeRoot);
-		SpaceTreeNode<?> root = new SpaceTreeNode(null, rootChild);
+		SpaceTreeNode<E> root = new SpaceTreeNode(null, rootChild);
 		
-		SpaceTreeModel model = new SpaceTreeModel(root);
+		SpaceTreeModel<E> model = new SpaceTreeModel<E>(root);
 		myComp.setModel(model);
 	}
 	
 	@Listen("onClick= #add")
 	public void addNode() {
-	    SpaceTreeNode childNode = new SpaceTreeNode(new UserDataBean(conut++ +"", "Allen", conut++), null);
-	    SpaceTreeNode seldNode = myComp.getSelectedNode();
+	    SpaceTreeNode<E> childNode = new SpaceTreeNode(new UserDataBean(conut++ +"", "Allen", conut++), null);
+	    SpaceTreeNode<E> seldNode = myComp.getSelectedNode();
 	    seldNode.add(childNode);
 	}
 	
 	@Listen("onClick= #remove")
 	public void removeNode() {
-	    SpaceTreeNode seldNode = myComp.getSelectedNode();
+	    SpaceTreeNode<E> seldNode = myComp.getSelectedNode();
 	    seldNode.getParent().remove(seldNode);
 	}
 	

@@ -7,7 +7,7 @@ import org.zkoss.zul.DefaultTreeModel;
 import org.zkoss.zul.TreeNode;
 
 @SuppressWarnings("serial")
-public class SpaceTreeModel<E extends SpaceTreeData<?>> extends
+public class SpaceTreeModel<E extends SpaceTreeData> extends
 		DefaultTreeModel<E> {
 
 	@SuppressWarnings("rawtypes")

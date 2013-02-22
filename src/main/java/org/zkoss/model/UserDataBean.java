@@ -1,9 +1,8 @@
 package org.zkoss.model;
 
 import org.zkoss.addon.SpaceTreeData;
-import org.zkoss.json.JSONObject;
 
-public class UserDataBean implements SpaceTreeData<JSONObject> {
+public class UserDataBean implements SpaceTreeData {
 
 	private String id;
 	private String name;

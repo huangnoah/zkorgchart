@@ -19,7 +19,7 @@ import org.zkoss.zul.event.ZulEvents;
 import org.zkoss.zul.impl.XulElement;
 
 @SuppressWarnings("serial")
-public class OrgChart<E extends SpaceTreeData<?>> extends XulElement {
+public class OrgChart<E extends SpaceTreeData> extends XulElement {
 
 	/** Used to render treeitem if _model is specified. */
 	private class Renderer implements java.io.Serializable {
