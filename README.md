@@ -2,7 +2,7 @@
 
 ## Introduct
 
-  Orgchart is a tree browser (or call **SpaceTree**) that offers a convenient way to display data. It consist of nodes and paths, and the paths represent the links connecting these nodes. You can expand or collapse individual nodes in the tree to show or hide its children. And you can change the attributes to affect how the tree is displayed. For Example, use the **level** to adjust the number of levels that are shown in the tree. 
+  Orgchart is a tree browser (or call **SpaceTree**) that offers a convenient way to display data. It consists of nodes and paths, and the paths represent the links connecting these nodes. You can expand or collapse individual nodes in the tree to show or hide its children. And you can change the attributes to affect how the tree is displayed. For Example, use the **level** to adjust the number of levels that are shown in the tree. 
 
 ## Example
 
@@ -171,10 +171,6 @@ Create some SpaceTree node and combine all nodes together.
 	
 	}
 
-you can see the example in Github [https://github.com/huangnoah/zkorgchart](https://github.com/huangnoah/zkorgchart) 
+You can download the complete source code for this example from its github repository [here](https://github.com/huangnoah/zkorgchart) 
 
-  
-
-    
-
-  
+Reference: [ZK Small Talk - Integrate 3rd Party Javascript Libraries In ZK](http://books.zkoss.org/wiki/Small_Talks/2012/November/Integrate_3rd_Party_Javascript_Libraries_In_ZK)
