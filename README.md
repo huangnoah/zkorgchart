@@ -1,12 +1,12 @@
-# Orgchart
+# Orgchart: a tree browser that offers a convenient way to display data
 
 ## Introduct
 
-  Orgchart is a tree browser (or call **SpaceTree**), the tree offers a convenient way to display data, it consist of nodes and paths, the path represent the relation between node and node. You can expand or collapse individual nodes in the tree to show or hide its children. And you can use the attributes to affect how the tree is displayed.  For Example, use the **level** to adjust the number of levels that are shown in the tree. 
+  Orgchart is a tree browser (or call **SpaceTree**) that offers a convenient way to display data. It consist of nodes and paths, and the paths represent the links connecting these nodes. You can expand or collapse individual nodes in the tree to show or hide its children. And you can change the attributes to affect how the tree is displayed. For Example, use the **level** to adjust the number of levels that are shown in the tree. 
 
 ## Example
 
-Suppose we want to describe the staff information and the relation between staff in company or organization by orgchart.
+Suppose we want to make a orgchart to display the staffs information and the relations connecting those staffs.
 
 ### SpaceTree Layout
 
@@ -25,97 +25,151 @@ To show the SpaceTree layout visualization we need a orgchart component. I have 
 	</zk>
 
 
-In order to show the information and relation, we need to map staff information to java bean which called **UserDataBean** and implements **SpaceTreeData** interface,
-then we can define the relation in **SpaceTreeNode**
+Now, we can put the staffs information into Java bean (or the data of node) which is called **UserDataBean** and implements **SpaceTreeData** interface, then we can put the **UserDataBean** into **SpaceTreeNode** and define the relations in **SpaceTreeNode**.
 
-### Map information into your Java Bean
+### Put the staffs information inot Java Bean (or the data of node)
 
-the **UserDataBean** represent the data of **SpaceTree** node.
-SpaceTree layout accepts **JSON** data, 
-the only thing you need to do is create the JSON Object contains other properties but **exclude** **id** and **name** in **getJsonData()** method if **UserDataBean** already implements **SpaceTreeData** interface,
-so we can get correct JSON format for SpaceTree usage when **SpaceTreeNode** call **toJSONString()** method
-
-the java bean code would be as follows.
+The **UserDataBean** represents the data of **SpaceTree** node.
 
 **JavaBean**
   
     // customize your java bean
-    public class UserDataBean implements SpaceTreeData<JSONObject> {
+    public class UserDataBean implements SpaceTreeData {
 
 		private String id;
 		private String name;
 		private int age;
 
-        // put other data but exclude id and name into JSONObject 
-		public JSONObject getJsonData() {
-			JSONObject json = new JSONObject();
-			json.put("age", age);
-			return json;
-		}
-
         // constructor, getter and setter
 
     }
-    
+
+Implemented **JSONAware** interface for the **SpaceTreeNode** allows us to easily transform tree node structure into JSON string that can be sent to client for evaluation and further processing.
+Calling **toJSONString()** on the root node can convert the whole structure into JSON string.
+
+**SpaceTreeNode**
+
+	public class SpaceTreeNode<E extends SpaceTreeData> extends
+		DefaultTreeNode<E> implements JSONAware {
+
+		public SpaceTreeNode(E data, Collection<SpaceTreeNode<E>> children) {
+			super(data, children);
+		}
+	
+		public String getId() {
+			return getData().getId();
+		}
+	
+		public String getName() {
+			return getData().getName();
+		}
+	
+		public boolean hasChildren() {
+			return getChildren() != null && getChildren().size() != 0;
+		}
+	
+		public void setName(String name) {
+			getData().setName(name);
+		}
+	
+		@Override
+		public String toJSONString() {
+			JSONObject json = new JSONObject();
+			json.put("id", getId());
+			json.put("name", getName());
+			E dataObj = getData();
+	
+			List<Field> fields = Arrays.asList(dataObj.getClass()
+					.getDeclaredFields());
+			JSONObject props = new JSONObject();
+			String name = null;
+	
+			for (Field field : fields) {
+				name = field.getName();
+				if ("id".equals(name) || "name".equals(name)) {
+					continue;
+				}
+	
+				field.setAccessible(true);
+				try {
+					props.put(name, field.get(dataObj));
+				} catch (IllegalArgumentException e) {
+					props.put(name, null);
+				} catch (IllegalAccessException e) {
+					props.put(name, null);
+				} finally {
+					field.setAccessible(false);
+				}
+			}
+	
+			json.put("data", props);
+			json.put("children", getChildren());
+			return json.toJSONString();
+		}
+
+	}
     
 ### Define the relation and Initialize SpaceTree
-    
-Implemented **SpaceTreeData** interface for the **UserDataBean** allows we to easily transform tree node structure into JSON string that can be sent to client for evaluation and further processing.
-Below is how we create some simple **SpaceTreeNode** and convert the whole structure into JSON string by calling **toJSONString()** on the root node.
+
+Create some SpaceTree node and combine all nodes together.
 
 **Composer**
   
-    public class SpaceTreeComposer extends SelectorComposer<Window> {
-    
-    	@Wire("#myComp")
-		private OrgChart<?> myComp;
+    public class SpaceTreeComposer<E extends SpaceTreeData> extends SelectorComposer<Window> {
+
+		@Wire("#myComp")
+		private OrgChart<E> myComp;
+		
 		public static int conut = 50;
 		
-    	// init tree
-        public void doAfterCompose(Window comp) throws Exception {
+		public void doAfterCompose(Window comp) throws Exception {
 			super.doAfterCompose(comp);
-		
-			List<SpaceTreeNode<?>> firstChildren = new ArrayList<SpaceTreeNode<?>>();
+			
+			List<SpaceTreeNode<E>> firstChildren = new ArrayList<SpaceTreeNode<E>>();
 			firstChildren.add(new SpaceTreeNode(new UserDataBean("11", "Jack", 11), null));
 			firstChildren.add(new SpaceTreeNode(new UserDataBean("12", "Mary", 12), null));
 			firstChildren.add(new SpaceTreeNode(new UserDataBean("13", "Jean", 13), null));
-			SpaceTreeNode<?> first = new SpaceTreeNode(new UserDataBean("1", "Jason", 1), firstChildren);
-		
-			List<SpaceTreeNode<?>> secondChildren = new ArrayList<SpaceTreeNode<?>>();
+			SpaceTreeNode<E> first = new SpaceTreeNode(new UserDataBean("1", "Jason", 1), firstChildren);
+			
+			List<SpaceTreeNode<E>> secondChildren = new ArrayList<SpaceTreeNode<E>>();
 			secondChildren.add(new SpaceTreeNode(new UserDataBean("21", "Sam", 21), null));
 			secondChildren.add(new SpaceTreeNode(new UserDataBean("22", "Tom", 22), null));
 			secondChildren.add(new SpaceTreeNode(new UserDataBean("23", "Tim", 23), null));
-			SpaceTreeNode<?> second = new SpaceTreeNode(new UserDataBean("2", "Partick", 23), secondChildren);
-		
-			List<SpaceTreeNode<?>> rootChildren = new ArrayList<SpaceTreeNode<?>>();
-			rootChildren.add(first);
-			rootChildren.add(second);
-			SpaceTreeNode<?> root = new SpaceTreeNode(new UserDataBean("0", "Peter", 0), rootChildren);
-		
-			DefaultTreeModel model = new DefaultTreeModel(root);
-			myComp.initModel(model);
+			SpaceTreeNode<E> second = new SpaceTreeNode(new UserDataBean("2", "Partick", 23), secondChildren);
+			
+			List<SpaceTreeNode<E>> sapcetreeRootChildren = new ArrayList<SpaceTreeNode<E>>();
+			sapcetreeRootChildren.add(first);
+			sapcetreeRootChildren.add(second);
+			SpaceTreeNode<E> spacetreeRoot = new SpaceTreeNode(new UserDataBean("0", "Peter", 0), sapcetreeRootChildren);
+			
+			List<SpaceTreeNode<E>> rootChild = new ArrayList<SpaceTreeNode<E>>();
+			rootChild.add(spacetreeRoot);
+			SpaceTreeNode<E> root = new SpaceTreeNode(null, rootChild);
+			
+			SpaceTreeModel<E> model = new SpaceTreeModel<E>(root);
+			myComp.setModel(model);
 		}
 		
-		// add node
 		@Listen("onClick= #add")
 		public void addNode() {
-		    SpaceTreeNode node = new SpaceTreeNode(new UserDataBean(conut++ +"", "Allen", conut++), null);
-		    myComp.add(node, myComp.getSelectedNodeId());
+		    SpaceTreeNode<E> childNode = new SpaceTreeNode(new UserDataBean(conut++ +"", "Allen", conut++), null);
+		    SpaceTreeNode<E> seldNode = myComp.getSelectedNode();
+		    seldNode.add(childNode);
 		}
 		
-		// remove node
 		@Listen("onClick= #remove")
 		public void removeNode() {
-		    myComp.remove(myComp.getSelectedNodeId());
+		    SpaceTreeNode<E> seldNode = myComp.getSelectedNode();
+		    seldNode.getParent().remove(seldNode);
 		}
 		
-		// edit node
 		@Listen("onSelect= #myComp")
 		public void editNode() {
 			SpaceTreeNode seld = myComp.getSelectedNode();
 			seld.setData(new UserDataBean(seld.getId(), "Augustin", conut++));
 		}
-    }
+	
+	}
 
 you can see the example in Github [https://github.com/huangnoah/zkorgchart](https://github.com/huangnoah/zkorgchart) 
 
