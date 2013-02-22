@@ -47,7 +47,6 @@ public class OrgChart<E extends SpaceTreeData> extends XulElement {
 				((RendererCtrl) _renderer).doFinally();
 		}
 
-		@SuppressWarnings("unchecked")
 		private String render(SpaceTreeNode<E> node) throws Throwable {
 			String json = null;
 			if (!_rendered && (_renderer instanceof RendererCtrl)) {
@@ -146,7 +145,8 @@ public class OrgChart<E extends SpaceTreeData> extends XulElement {
 	/**
 	 * Returns the renderer used to render items.
 	 */
-	private SpaceTreeNodeRenderer getRealRenderer() {
+	@SuppressWarnings("unchecked")
+	private SpaceTreeNodeRenderer<E> getRealRenderer() {
 		return _renderer != null ? _renderer : _defRend;
 	}
 
@@ -359,7 +359,6 @@ public class OrgChart<E extends SpaceTreeData> extends XulElement {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	public void setModel(SpaceTreeModel<E> model) {
 		if (model != null) {
 			if (!(model instanceof SpaceTreeModel))

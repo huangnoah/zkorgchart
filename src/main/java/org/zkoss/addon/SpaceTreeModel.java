@@ -10,14 +10,12 @@ import org.zkoss.zul.TreeNode;
 public class SpaceTreeModel<E extends SpaceTreeData> extends
 		DefaultTreeModel<E> {
 
-	@SuppressWarnings("rawtypes")
-	public SpaceTreeModel(SpaceTreeNode root) {
+	public SpaceTreeModel(SpaceTreeNode<E> root) {
 		super(root);
 	}
 
-	@SuppressWarnings("rawtypes")
-	public SpaceTreeNode getSpaceTreeRoot() {
-		return (SpaceTreeNode) getRoot().getChildren().get(0);
+	public SpaceTreeNode<E> getSpaceTreeRoot() {
+		return (SpaceTreeNode<E>) getRoot().getChildren().get(0);
 	}
 
 	public SpaceTreeNode<E> find(String id) {
