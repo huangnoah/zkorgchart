@@ -2,7 +2,7 @@
 
 ## Introduct
 
-  Orgchart is a tree browser (or call **SpaceTree**) that offers a convenient way to display data. It consists of nodes and paths, and the paths represent the links connecting these nodes. You can expand or collapse individual nodes in the tree to show or hide its children. And you can change the attributes to affect how the tree is displayed. For Example, use the **level** to adjust the number of levels that are shown in the tree. 
+  Orgchart is a tree browser (or call **SpaceTree**) that offers a convenient way to display data. It consists of nodes and paths, and the paths represent the links connecting these nodes. You can expand or collapse individual nodes in the tree to show or hide its children. And you can change the attributes to affect how the tree is displayed. For example, use the **level** to adjust the number of levels that are shown in the tree. 
 
 ## Example
 
@@ -25,7 +25,7 @@ To show the SpaceTree layout visualization we need a orgchart component. I have 
 	</zk>
 
 
-Now, we can put the staffs information into Java bean (or the data of node) which is called **UserDataBean** and implements **SpaceTreeData** interface, then we can put the **UserDataBean** into **SpaceTreeNode** and define the relations in **SpaceTreeNode**.
+Now, we can put the staffs information into Java bean (or the data of node) which is called **UserDataBean** and implements **SpaceTreeData** interface, then we use the **UserDataBean** as the data of **SpaceTreeNode** and create the relations in **SpaceTreeNode**.
 
 ### Put the staffs information inot Java Bean (or the data of node)
 
