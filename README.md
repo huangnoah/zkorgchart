@@ -25,16 +25,16 @@ To show the SpaceTree layout visualization we need a orgchart component. I have 
 	</zk>
 
 
-Now, we can put the staffs information into Java bean (or the data of node) which is called **UserDataBean** and implements **SpaceTreeData** interface, then we use the **UserDataBean** as the data of **SpaceTreeNode** and create the relations in **SpaceTreeNode**.
+Now, we can put the staffs information into Java bean (or the data of node) which is called **UserDataBean**, then we use the **UserDataBean** as the data of **SpaceTreeNode** and create the relations in **SpaceTreeNode**.
 
 ### Put the staffs information inot Java Bean (or the data of node)
 
-The **UserDataBean** represents the data of **SpaceTree** node.
+The **UserDataBean** represents the data of **SpaceTreeNode**.
 
 **JavaBean**
   
     // customize your java bean
-    public class UserDataBean implements SpaceTreeData {
+    public class UserDataBean {
 
 		private String id;
 		private String name;
@@ -49,69 +49,143 @@ Calling **toJSONString()** on the root node can convert the whole structure into
 
 **SpaceTreeNode**
 
-	public class SpaceTreeNode<E extends SpaceTreeData> extends
-		DefaultTreeNode<E> implements JSONAware {
+	public class SpaceTreeNode<E> extends DefaultTreeNode<E> implements JSONAware {
 
 		public SpaceTreeNode(E data, Collection<SpaceTreeNode<E>> children) {
 			super(data, children);
 		}
 	
-		public String getId() {
-			return getData().getId();
+		public String getJSONId() {
+			return OrgChart.getRealRenderer().getJSONId(this);
 		}
 	
-		public String getName() {
-			return getData().getName();
+		public String getJSONName() {
+			return OrgChart.getRealRenderer().getJSONName(this);
+		}
+		
+		public JSONObject getJSONData() {
+			return OrgChart.getRealRenderer().getJSONData(this);
 		}
 	
 		public boolean hasChildren() {
 			return getChildren() != null && getChildren().size() != 0;
 		}
 	
-		public void setName(String name) {
-			getData().setName(name);
+		@Override
+		public String toJSONString() {
+			return OrgChart.getRealRenderer().toJSONString(this);
 		}
 	
 		@Override
-		public String toJSONString() {
-			JSONObject json = new JSONObject();
-			json.put("id", getId());
-			json.put("name", getName());
-			E dataObj = getData();
+		public void remove(TreeNode<E> child) {
+			if (!((SpaceTreeNode<E>) child).isSpaceTreeRoot()) {
+				super.remove(child);
+			}
+		}
 	
-			List<Field> fields = Arrays.asList(dataObj.getClass()
-					.getDeclaredFields());
-			JSONObject props = new JSONObject();
-			String name = null;
+		@Override
+		public boolean equals(Object obj) {
+			if (obj != null && obj instanceof SpaceTreeNode) {
+				return toJSONString().equals(((SpaceTreeNode) obj).toJSONString());
+			} else {
+				return false;
+			}
+		}
 	
-			for (Field field : fields) {
-				name = field.getName();
-				if ("id".equals(name) || "name".equals(name)) {
-					continue;
-				}
+		public boolean isSpaceTreeRoot() {
+			return equals(((SpaceTreeModel<E>) getModel()).getSpaceTreeRoot());
+		}
 	
+	}
+	
+OrgChart.getRealRenderer() will check if the customize renderer exists, if not it uses the default renderer.
+
+**Default Node Renderer**
+
+	// default node renderer in OrgChart
+    private static final SpaceTreeNodeRenderer _defRend = new SpaceTreeNodeRenderer() {
+		@Override
+		public String render(SpaceTreeNode node) {
+			if (node.getData() == null) {
+				return "{}";
+			} else {
+				return node.toJSONString();
+			}
+		}
+
+		private String getDataValue(SpaceTreeNode node, String fieldName) {
+			Object data = node.getData();
+			String value = null;
+			try {
+				Field field = data.getClass().getDeclaredField(fieldName);
 				field.setAccessible(true);
-				try {
-					props.put(name, field.get(dataObj));
-				} catch (IllegalArgumentException e) {
-					props.put(name, null);
-				} catch (IllegalAccessException e) {
-					props.put(name, null);
-				} finally {
-					field.setAccessible(false);
+				value = field.get(data).toString();
+			} catch (SecurityException e) {
+				e.printStackTrace();
+			} catch (NoSuchFieldException e) {
+				e.printStackTrace();
+			} catch (IllegalArgumentException e) {
+				e.printStackTrace();
+			} catch (IllegalAccessException e) {
+				e.printStackTrace();
+			}
+			return value;
+		}
+
+		@Override
+		public String getJSONId(SpaceTreeNode node) {
+			return getDataValue(node, "id");
+		}
+
+		@Override
+		public String getJSONName(SpaceTreeNode node) {
+			return getDataValue(node, "name");
+		}
+
+		@Override
+		public JSONObject getJSONData(SpaceTreeNode node) {
+			Object data = node.getData();
+			JSONObject props = new JSONObject();
+
+			List<Field> fields = Arrays.asList(data.getClass()
+					.getDeclaredFields());
+			String fieldname = null;
+
+			for (Field field : fields) {
+				field.setAccessible(true);
+				fieldname = field.getName();
+
+				if ("id".equals(fieldname) || "name".equals(fieldname)) {
+					continue;
+				} else {
+					try {
+						props.put(fieldname, field.get(data));
+					} catch (IllegalArgumentException e) {
+						e.printStackTrace();
+					} catch (IllegalAccessException e) {
+						e.printStackTrace();
+					}
 				}
 			}
-	
-			json.put("data", props);
-			json.put("children", getChildren());
+
+			return props;
+		}
+
+		@Override
+		public String toJSONString(SpaceTreeNode node) {
+			JSONObject json = new JSONObject();
+			json.put("id", node.getJSONId());
+			json.put("name", node.getJSONName());
+			json.put("data", node.getJSONData());
+			json.put("children", node.getChildren());
 			return json.toJSONString();
 		}
 
-	}
+	};
     
 ### Define the relation and Initialize SpaceTree
 
-Create some SpaceTree node and combine all nodes together.
+Create some SpaceTree nodes and combine all nodes together.
 
 **Composer**
   
@@ -137,9 +211,9 @@ Create some SpaceTree node and combine all nodes together.
 			secondChildren.add(new SpaceTreeNode(new UserDataBean("23", "Tim", 23), null));
 			SpaceTreeNode<E> second = new SpaceTreeNode(new UserDataBean("2", "Partick", 23), secondChildren);
 			
-			List<SpaceTreeNode<E>> sapcetreeRootChildren = new ArrayList<SpaceTreeNode<E>>();
-			sapcetreeRootChildren.add(first);
-			sapcetreeRootChildren.add(second);
+			List<SpaceTreeNode<E>> spacetreeRootChildren = new ArrayList<SpaceTreeNode<E>>();
+			spacetreeRootChildren.add(first);
+			spacetreeRootChildren.add(second);
 			SpaceTreeNode<E> spacetreeRoot = new SpaceTreeNode(new UserDataBean("0", "Peter", 0), sapcetreeRootChildren);
 			
 			List<SpaceTreeNode<E>> rootChild = new ArrayList<SpaceTreeNode<E>>();
@@ -166,7 +240,7 @@ Create some SpaceTree node and combine all nodes together.
 		@Listen("onSelect= #myComp")
 		public void editNode() {
 			SpaceTreeNode seld = myComp.getSelectedNode();
-			seld.setData(new UserDataBean(seld.getId(), "Augustin", conut++));
+			seld.setData(new UserDataBean(seld.getJSONId(), "Augustin", conut++));
 		}
 	
 	}
