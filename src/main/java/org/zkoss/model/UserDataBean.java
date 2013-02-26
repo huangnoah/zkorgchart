@@ -1,8 +1,6 @@
 package org.zkoss.model;
 
-import org.zkoss.addon.SpaceTreeData;
-
-public class UserDataBean implements SpaceTreeData {
+public class UserDataBean {
 
 	private String id;
 	private String name;

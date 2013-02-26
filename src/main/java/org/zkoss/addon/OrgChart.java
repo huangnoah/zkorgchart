@@ -1,6 +1,9 @@
 package org.zkoss.addon;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 import org.zkoss.json.JSONObject;
@@ -19,7 +22,7 @@ import org.zkoss.zul.event.ZulEvents;
 import org.zkoss.zul.impl.XulElement;
 
 @SuppressWarnings("serial")
-public class OrgChart<E extends SpaceTreeData> extends XulElement {
+public class OrgChart<E> extends XulElement {
 
 	/** Used to render treeitem if _model is specified. */
 	private class Renderer implements java.io.Serializable {
@@ -88,7 +91,7 @@ public class OrgChart<E extends SpaceTreeData> extends XulElement {
 	private String _cmd = "";
 	private String _addNodeJson = "{}";
 	private boolean init = true;
-	private transient SpaceTreeNodeRenderer<E> _renderer;
+	private static transient SpaceTreeNodeRenderer _renderer;
 	private transient TreeDataListener _dataListener;
 	private static final String ATTR_ON_INIT_RENDER_POSTED = "org.zkoss.zul.Tree.onInitLaterPosted";
 	private static final SpaceTreeNodeRenderer _defRend = new SpaceTreeNodeRenderer() {
@@ -100,6 +103,75 @@ public class OrgChart<E extends SpaceTreeData> extends XulElement {
 				return node.toJSONString();
 			}
 		}
+
+		@Override
+		public String getJSONId(SpaceTreeNode node) {
+			return getDataValue(node, "id");
+		}
+
+		private String getDataValue(SpaceTreeNode node, String fieldName) {
+			Object data = node.getData();
+			String value = null;
+			try {
+				Field field = data.getClass().getDeclaredField(fieldName);
+				field.setAccessible(true);
+				value = field.get(data).toString();
+			} catch (SecurityException e) {
+				e.printStackTrace();
+			} catch (NoSuchFieldException e) {
+				e.printStackTrace();
+			} catch (IllegalArgumentException e) {
+				e.printStackTrace();
+			} catch (IllegalAccessException e) {
+				e.printStackTrace();
+			}
+			return value;
+		}
+
+		@Override
+		public String getJSONName(SpaceTreeNode node) {
+			return getDataValue(node, "name");
+		}
+
+		@Override
+		public JSONObject getJSONData(SpaceTreeNode node) {
+			Object data = node.getData();
+			JSONObject props = new JSONObject();
+
+			List<Field> fields = Arrays.asList(data.getClass()
+					.getDeclaredFields());
+			String fieldname = null;
+
+			for (Field field : fields) {
+				field.setAccessible(true);
+				fieldname = field.getName();
+
+				if ("id".equals(fieldname) || "name".equals(fieldname)) {
+					continue;
+				} else {
+					try {
+						props.put(fieldname, field.get(data));
+					} catch (IllegalArgumentException e) {
+						e.printStackTrace();
+					} catch (IllegalAccessException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+
+			return props;
+		}
+
+		@Override
+		public String toJSONString(SpaceTreeNode node) {
+			JSONObject json = new JSONObject();
+			json.put("id", node.getJSONId());
+			json.put("name", node.getJSONName());
+			json.put("data", node.getJSONData());
+			json.put("children", node.getChildren());
+			return json.toJSONString();
+		}
+
 	};
 
 	public SpaceTreeNode<E> find(String id) {
@@ -146,7 +218,7 @@ public class OrgChart<E extends SpaceTreeData> extends XulElement {
 	 * Returns the renderer used to render items.
 	 */
 	@SuppressWarnings("unchecked")
-	private SpaceTreeNodeRenderer<E> getRealRenderer() {
+	public static SpaceTreeNodeRenderer getRealRenderer() {
 		return _renderer != null ? _renderer : _defRend;
 	}
 
@@ -271,7 +343,7 @@ public class OrgChart<E extends SpaceTreeData> extends XulElement {
 		if (!Objects.equals(_cmd, ""))
 			render(renderer, "cmd", _cmd);
 		if (!Objects.equals(_sel, ""))
-			render(renderer, "selectedNode", _sel);
+			render(renderer, "selectedNode", _sel.toJSONString());
 		if (!Objects.equals(_addNodeJson, "{}"))
 			render(renderer, "addNodeJson", _addNodeJson);
 
@@ -375,7 +447,7 @@ public class OrgChart<E extends SpaceTreeData> extends XulElement {
 				if (_model != null) {
 					_model.removeTreeDataListener(_dataListener);
 				}
-				// to ensure root should be unique
+				// to ensure spacetree root should be unique
 				for (TreeNode<E> child : root.getChildren()) {
 					if (spacetreeRoot == child) {
 						continue;

@@ -1,21 +1,25 @@
 package org.zkoss.addon;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.zkoss.zul.DefaultTreeModel;
 import org.zkoss.zul.TreeNode;
 
 @SuppressWarnings("serial")
-public class SpaceTreeModel<E extends SpaceTreeData> extends
-		DefaultTreeModel<E> {
+public class SpaceTreeModel<E> extends DefaultTreeModel<E> {
 
 	public SpaceTreeModel(SpaceTreeNode<E> root) {
 		super(root);
 	}
 
 	public SpaceTreeNode<E> getSpaceTreeRoot() {
-		return (SpaceTreeNode<E>) getRoot().getChildren().get(0);
+		List<TreeNode<E>> children = getRoot().getChildren();
+		if (children.size() > 0)
+			return (SpaceTreeNode<E>) children.get(0);
+		else
+			return null;
 	}
 
 	public SpaceTreeNode<E> find(String id) {
@@ -30,7 +34,7 @@ public class SpaceTreeModel<E extends SpaceTreeData> extends
 		// check children
 		for (TreeNode<E> rawChild : node.getChildren()) {
 			SpaceTreeNode<E> child = (SpaceTreeNode<E>) rawChild;
-			String childId = child.getId();
+			String childId = child.getJSONId();
 
 			if (checked.get(childId) != null) {
 				// if it checked, then skip
@@ -50,10 +54,10 @@ public class SpaceTreeModel<E extends SpaceTreeData> extends
 
 		// check itself after all children is checked
 		SpaceTreeNode<E> thisNode = (SpaceTreeNode<E>) node;
-		if (thisNode.getId().equals(id)) {
+		if (thisNode.getJSONId().equals(id)) {
 			return (SpaceTreeNode<E>) node;
 		} else {
-			checked.put(thisNode.getId(), true);
+			checked.put(thisNode.getJSONId(), true);
 		}
 
 		TreeNode<E> parent = thisNode.getParent();
@@ -66,4 +70,5 @@ public class SpaceTreeModel<E extends SpaceTreeData> extends
 		}
 
 	}
+	
 }

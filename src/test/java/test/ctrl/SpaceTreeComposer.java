@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.zkoss.addon.OrgChart;
-import org.zkoss.addon.SpaceTreeData;
 import org.zkoss.addon.SpaceTreeModel;
 import org.zkoss.addon.SpaceTreeNode;
 import org.zkoss.model.UserDataBean;
@@ -13,7 +12,7 @@ import org.zkoss.zk.ui.select.annotation.Listen;
 import org.zkoss.zk.ui.select.annotation.Wire;
 import org.zkoss.zul.Window;
 
-public class SpaceTreeComposer<E extends SpaceTreeData> extends SelectorComposer<Window> {
+public class SpaceTreeComposer<E> extends SelectorComposer<Window> {
 
 	@Wire("#myComp")
 	private OrgChart<E> myComp;
@@ -35,10 +34,10 @@ public class SpaceTreeComposer<E extends SpaceTreeData> extends SelectorComposer
 		secondChildren.add(new SpaceTreeNode(new UserDataBean("23", "Tim", 23), null));
 		SpaceTreeNode<E> second = new SpaceTreeNode(new UserDataBean("2", "Partick", 23), secondChildren);
 		
-		List<SpaceTreeNode<E>> sapcetreeRootChildren = new ArrayList<SpaceTreeNode<E>>();
-		sapcetreeRootChildren.add(first);
-		sapcetreeRootChildren.add(second);
-		SpaceTreeNode<E> spacetreeRoot = new SpaceTreeNode(new UserDataBean("0", "Peter", 0), sapcetreeRootChildren);
+		List<SpaceTreeNode<E>> spacetreeRootChildren = new ArrayList<SpaceTreeNode<E>>();
+		spacetreeRootChildren.add(first);
+		spacetreeRootChildren.add(second);
+		SpaceTreeNode<E> spacetreeRoot = new SpaceTreeNode(new UserDataBean("0", "Peter", 0), spacetreeRootChildren);
 		
 		List<SpaceTreeNode<E>> rootChild = new ArrayList<SpaceTreeNode<E>>();
 		rootChild.add(spacetreeRoot);
@@ -64,7 +63,7 @@ public class SpaceTreeComposer<E extends SpaceTreeData> extends SelectorComposer
 	@Listen("onSelect= #myComp")
 	public void editNode() {
 		SpaceTreeNode seld = myComp.getSelectedNode();
-		seld.setData(new UserDataBean(seld.getId(), "Augustin", conut++));
+		seld.setData(new UserDataBean(seld.getJSONId(), "Augustin", conut++));
 	}
 
 }
