@@ -1,9 +1,7 @@
 package org.zkoss.addon;
 
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.List;
+import java.util.Iterator;
 import java.util.Map;
 
 import org.zkoss.json.JSONObject;
@@ -50,15 +48,55 @@ public class OrgChart<E> extends XulElement {
 				((RendererCtrl) _renderer).doFinally();
 		}
 
+		private String render(SpaceTreeNode<E> node, String defVal) {
+			try {
+				String reuslt = render(node);
+				return reuslt;
+			} catch (Throwable e) {
+				return defVal;
+			}
+
+		}
+
 		private String render(SpaceTreeNode<E> node) throws Throwable {
-			String json = null;
+			if (node == null || node.getData() == null) {
+				return "{}";
+			}
+
+			JSONObject json = new JSONObject();
 			if (!_rendered && (_renderer instanceof RendererCtrl)) {
 				((RendererCtrl) _renderer).doTry();
 				_ctrled = true;
 			}
 			try {
 				try {
-					json = _renderer.render(node);
+					json.put("id", node.getId());
+					json.put("name", _renderer.render(node));
+
+					if (node.isLeaf())
+						json.put("children", "null");
+					else {
+						boolean first = true;
+						StringBuffer sb = new StringBuffer();
+						Iterator iter = node.getChildren().iterator();
+
+						sb.append('[');
+						while (iter.hasNext()) {
+							if (first)
+								first = false;
+							else
+								sb.append(',');
+
+							Object value = iter.next();
+							if (value == null) {
+								sb.append("null");
+								continue;
+							}
+							sb.append(render((SpaceTreeNode) value));
+						}
+						sb.append(']');
+						json.put("children", JSONValue.parse(sb.toString()));
+					}
 				} catch (AbstractMethodError ex) {
 					final Method m = _renderer.getClass().getMethod("render",
 							new Class<?>[] { SpaceTreeNode.class });
@@ -69,7 +107,7 @@ public class OrgChart<E> extends XulElement {
 				throw ex;
 			}
 			_rendered = true;
-			return json;
+			return json.toJSONString();
 		}
 	}
 
@@ -91,87 +129,14 @@ public class OrgChart<E> extends XulElement {
 	private String _cmd = "";
 	private String _addNodeJson = "{}";
 	private boolean init = true;
-	private static transient SpaceTreeNodeRenderer _renderer;
+	private transient SpaceTreeNodeRenderer _renderer;
 	private transient TreeDataListener _dataListener;
 	private static final String ATTR_ON_INIT_RENDER_POSTED = "org.zkoss.zul.Tree.onInitLaterPosted";
 	private static final SpaceTreeNodeRenderer _defRend = new SpaceTreeNodeRenderer() {
 		@Override
 		public String render(SpaceTreeNode node) {
-			if (node.getData() == null) {
-				return "{}";
-			} else {
-				return node.toJSONString();
-			}
+			return Objects.toString(node);
 		}
-
-		@Override
-		public String getJSONId(SpaceTreeNode node) {
-			return getDataValue(node, "id");
-		}
-
-		private String getDataValue(SpaceTreeNode node, String fieldName) {
-			Object data = node.getData();
-			String value = null;
-			try {
-				Field field = data.getClass().getDeclaredField(fieldName);
-				field.setAccessible(true);
-				value = field.get(data).toString();
-			} catch (SecurityException e) {
-				e.printStackTrace();
-			} catch (NoSuchFieldException e) {
-				e.printStackTrace();
-			} catch (IllegalArgumentException e) {
-				e.printStackTrace();
-			} catch (IllegalAccessException e) {
-				e.printStackTrace();
-			}
-			return value;
-		}
-
-		@Override
-		public String getJSONName(SpaceTreeNode node) {
-			return getDataValue(node, "name");
-		}
-
-		@Override
-		public JSONObject getJSONData(SpaceTreeNode node) {
-			Object data = node.getData();
-			JSONObject props = new JSONObject();
-
-			List<Field> fields = Arrays.asList(data.getClass()
-					.getDeclaredFields());
-			String fieldname = null;
-
-			for (Field field : fields) {
-				field.setAccessible(true);
-				fieldname = field.getName();
-
-				if ("id".equals(fieldname) || "name".equals(fieldname)) {
-					continue;
-				} else {
-					try {
-						props.put(fieldname, field.get(data));
-					} catch (IllegalArgumentException e) {
-						e.printStackTrace();
-					} catch (IllegalAccessException e) {
-						e.printStackTrace();
-					}
-				}
-			}
-
-			return props;
-		}
-
-		@Override
-		public String toJSONString(SpaceTreeNode node) {
-			JSONObject json = new JSONObject();
-			json.put("id", node.getJSONId());
-			json.put("name", node.getJSONName());
-			json.put("data", node.getJSONData());
-			json.put("children", node.getChildren());
-			return json.toJSONString();
-		}
-
 	};
 
 	public SpaceTreeNode<E> find(String id) {
@@ -218,7 +183,7 @@ public class OrgChart<E> extends XulElement {
 	 * Returns the renderer used to render items.
 	 */
 	@SuppressWarnings("unchecked")
-	public static SpaceTreeNodeRenderer getRealRenderer() {
+	public SpaceTreeNodeRenderer getRealRenderer() {
 		return _renderer != null ? _renderer : _defRend;
 	}
 
@@ -280,7 +245,8 @@ public class OrgChart<E> extends XulElement {
 			case TreeDataEvent.INTERVAL_ADDED:
 				SpaceTreeNode<E> lastChild = (SpaceTreeNode<E>) node
 						.getChildAt(node.getChildCount() - 1);
-				setAddNodeJson(getRealRenderer().render(lastChild));
+
+				setAddNodeJson(new Renderer().render(node, "{}"));
 				setJsonWithoutUpdate();
 				setCmd("add");
 				return;
@@ -343,7 +309,7 @@ public class OrgChart<E> extends XulElement {
 		if (!Objects.equals(_cmd, ""))
 			render(renderer, "cmd", _cmd);
 		if (!Objects.equals(_sel, ""))
-			render(renderer, "selectedNode", _sel.toJSONString());
+			render(renderer, "selectedNode", new Renderer().render(_sel, "{}"));
 		if (!Objects.equals(_addNodeJson, "{}"))
 			render(renderer, "addNodeJson", _addNodeJson);
 
@@ -483,7 +449,7 @@ public class OrgChart<E> extends XulElement {
 	public void setSelectedNode(SpaceTreeNode<E> sel) {
 		if (!Objects.equals(_sel, sel)) {
 			_sel = sel;
-			smartUpdate("selectedNode", _sel.toJSONString());
+			smartUpdate("selectedNode", new Renderer().render(_sel, "{}"));
 		}
 	}
 }

@@ -17,27 +17,25 @@ public class SpaceTreeComposer<E> extends SelectorComposer<Window> {
 	@Wire("#myComp")
 	private OrgChart<E> myComp;
 	
-	public static int conut = 50;
-	
 	public void doAfterCompose(Window comp) throws Exception {
 		super.doAfterCompose(comp);
 		
 		List<SpaceTreeNode<E>> firstChildren = new ArrayList<SpaceTreeNode<E>>();
-		firstChildren.add(new SpaceTreeNode(new UserDataBean("11", "Jack", 11), null));
-		firstChildren.add(new SpaceTreeNode(new UserDataBean("12", "Mary", 12), null));
-		firstChildren.add(new SpaceTreeNode(new UserDataBean("13", "Jean", 13), null));
-		SpaceTreeNode<E> first = new SpaceTreeNode(new UserDataBean("1", "Jason", 1), firstChildren);
+		firstChildren.add(new SpaceTreeNode(new UserDataBean("Jack", 11), null));
+		firstChildren.add(new SpaceTreeNode(new UserDataBean("Mary", 12), null));
+		firstChildren.add(new SpaceTreeNode(new UserDataBean("Jean", 13), null));
+		SpaceTreeNode<E> first = new SpaceTreeNode(new UserDataBean("Jason", 1), firstChildren);
 		
 		List<SpaceTreeNode<E>> secondChildren = new ArrayList<SpaceTreeNode<E>>();
-		secondChildren.add(new SpaceTreeNode(new UserDataBean("21", "Sam", 21), null));
-		secondChildren.add(new SpaceTreeNode(new UserDataBean("22", "Tom", 22), null));
-		secondChildren.add(new SpaceTreeNode(new UserDataBean("23", "Tim", 23), null));
-		SpaceTreeNode<E> second = new SpaceTreeNode(new UserDataBean("2", "Partick", 23), secondChildren);
+		secondChildren.add(new SpaceTreeNode(new UserDataBean("Sam", 21), null));
+		secondChildren.add(new SpaceTreeNode(new UserDataBean("Tom", 22), null));
+		secondChildren.add(new SpaceTreeNode(new UserDataBean("Tim", 23), null));
+		SpaceTreeNode<E> second = new SpaceTreeNode(new UserDataBean("Partick", 23), secondChildren);
 		
 		List<SpaceTreeNode<E>> spacetreeRootChildren = new ArrayList<SpaceTreeNode<E>>();
 		spacetreeRootChildren.add(first);
 		spacetreeRootChildren.add(second);
-		SpaceTreeNode<E> spacetreeRoot = new SpaceTreeNode(new UserDataBean("0", "Peter", 0), spacetreeRootChildren);
+		SpaceTreeNode<E> spacetreeRoot = new SpaceTreeNode(new UserDataBean("Peter", 0), spacetreeRootChildren);
 		
 		List<SpaceTreeNode<E>> rootChild = new ArrayList<SpaceTreeNode<E>>();
 		rootChild.add(spacetreeRoot);
@@ -49,7 +47,7 @@ public class SpaceTreeComposer<E> extends SelectorComposer<Window> {
 	
 	@Listen("onClick= #add")
 	public void addNode() {
-	    SpaceTreeNode<E> childNode = new SpaceTreeNode(new UserDataBean(conut++ +"", "Allen", conut++), null);
+	    SpaceTreeNode<E> childNode = new SpaceTreeNode(new UserDataBean("Allen", 27), null);
 	    SpaceTreeNode<E> seldNode = myComp.getSelectedNode();
 	    seldNode.add(childNode);
 	}
@@ -63,7 +61,9 @@ public class SpaceTreeComposer<E> extends SelectorComposer<Window> {
 	@Listen("onSelect= #myComp")
 	public void editNode() {
 		SpaceTreeNode seld = myComp.getSelectedNode();
-		seld.setData(new UserDataBean(seld.getJSONId(), "Augustin", conut++));
+		UserDataBean data =  (UserDataBean) seld.getData();
+		data.setName("alan");
+		seld.setData(data);
 	}
 
 }

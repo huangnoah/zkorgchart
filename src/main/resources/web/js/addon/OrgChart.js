@@ -138,25 +138,23 @@ addon.OrgChart = zk.$extends(zul.Widget, {
 		var component = this;
 		var nodeid = node["id"];
 		var oriJson = jq.evalJSON(component._oriJson);
-		var isRoot = (nodeid === oriJson["id"]);
-		if (!isRoot) {
-			if (!component._removing) {
-				component._removing = true;
-				var parent = $jit.json.getParent(oriJson, nodeid);
-				component._st.removeSubtree(nodeid, true, 'animate', {
-					hideLabels : false,
-					onComplete : function() {
-						var parentNode = component.getSubTree_(parent["id"])
-						var parentNodeStr = JSON.stringify(parentNode)
-						component._removing = false;
-						component._selectedNode = parentNodeStr;
-						component._json = JSON.stringify(component._st.toJSON("tree"));
-						component.fire('onUser', {
-							selectedNode : parentNodeStr
-						});
-					}
-				});
-			}
+		if (!component._removing) {
+			component._removing = true;
+			var parent = $jit.json.getParent(oriJson, nodeid);
+			component._st.removeSubtree(nodeid, true, 'animate', {
+				hideLabels : false,
+				onComplete : function() {
+					var parentNode = component.getSubTree_(parent["id"])
+					var parentNodeStr = JSON.stringify(parentNode)
+					component._removing = false;
+					component._selectedNode = parentNodeStr;
+					component._json = JSON.stringify(component._st
+							.toJSON("tree"));
+					component.fire('onUser', {
+						selectedNode : parentNodeStr
+					});
+				}
+			});
 		}
 	},
 

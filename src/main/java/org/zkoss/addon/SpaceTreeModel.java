@@ -34,7 +34,7 @@ public class SpaceTreeModel<E> extends DefaultTreeModel<E> {
 		// check children
 		for (TreeNode<E> rawChild : node.getChildren()) {
 			SpaceTreeNode<E> child = (SpaceTreeNode<E>) rawChild;
-			String childId = child.getJSONId();
+			String childId = child.getId() + ""; 
 
 			if (checked.get(childId) != null) {
 				// if it checked, then skip
@@ -54,10 +54,10 @@ public class SpaceTreeModel<E> extends DefaultTreeModel<E> {
 
 		// check itself after all children is checked
 		SpaceTreeNode<E> thisNode = (SpaceTreeNode<E>) node;
-		if (thisNode.getJSONId().equals(id)) {
+		if ((thisNode.getId() + "").equals(id)) {
 			return (SpaceTreeNode<E>) node;
 		} else {
-			checked.put(thisNode.getJSONId(), true);
+			checked.put(thisNode.getId() + "", true);
 		}
 
 		TreeNode<E> parent = thisNode.getParent();
