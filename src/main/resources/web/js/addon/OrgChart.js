@@ -159,6 +159,7 @@ addon.OrgChart = zk.$extends(zul.Widget, {
 	},
 
 	add_ : function(nodeJson, parent) {
+		console.log(nodeJson)
 		var component = this;
 		var parentid = parent["id"];
 		if (!component._adding) {

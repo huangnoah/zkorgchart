@@ -20,11 +20,11 @@ import org.zkoss.zul.event.ZulEvents;
 import org.zkoss.zul.impl.XulElement;
 
 @SuppressWarnings("serial")
-public class OrgChart<E> extends XulElement {
+public class OrgChart extends XulElement {
 
 	/** Used to render treeitem if _model is specified. */
 	private class Renderer implements java.io.Serializable {
-		private final SpaceTreeNodeRenderer<E> _renderer;
+		private final SpaceTreeRenderer _renderer;
 		private boolean _rendered, _ctrled;
 
 		private Renderer() {
@@ -48,17 +48,16 @@ public class OrgChart<E> extends XulElement {
 				((RendererCtrl) _renderer).doFinally();
 		}
 
-		private String render(SpaceTreeNode<E> node, String defVal) {
+		private String render(SpaceTreeNode<?> node, String defVal) {
 			try {
 				String reuslt = render(node);
 				return reuslt;
 			} catch (Throwable e) {
 				return defVal;
 			}
-
 		}
 
-		private String render(SpaceTreeNode<E> node) throws Throwable {
+		private String render(SpaceTreeNode<?> node) throws Throwable {
 			if (node == null || node.getData() == null) {
 				return "{}";
 			}
@@ -71,7 +70,7 @@ public class OrgChart<E> extends XulElement {
 			try {
 				try {
 					json.put("id", node.getId());
-					json.put("name", _renderer.render(node));
+					json.put("name", _renderer.render(node.getData()));
 
 					if (node.isLeaf())
 						json.put("children", "null");
@@ -123,72 +122,195 @@ public class OrgChart<E> extends XulElement {
 	private int _level = 2;
 	private String _nodetype = "rectangle";
 	private String _orient = "left";
-	private SpaceTreeModel<E> _model;
+	private SpaceTreeModel<?> _model;
 	private String _json = "{}";
-	private SpaceTreeNode<E> _sel = null;
+	private SpaceTreeNode<?> _sel = null;
 	private String _cmd = "";
 	private String _addNodeJson = "{}";
 	private boolean init = true;
-	private transient SpaceTreeNodeRenderer _renderer;
+	private transient SpaceTreeRenderer _renderer;
 	private transient TreeDataListener _dataListener;
 	private static final String ATTR_ON_INIT_RENDER_POSTED = "org.zkoss.zul.Tree.onInitLaterPosted";
-	private static final SpaceTreeNodeRenderer _defRend = new SpaceTreeNodeRenderer() {
+	private static final SpaceTreeRenderer _defRend = new SpaceTreeRenderer() {
 		@Override
-		public String render(SpaceTreeNode node) {
+		public String render(Object node) {
 			return Objects.toString(node);
 		}
 	};
 
-	public SpaceTreeNode<E> find(String id) {
+	public SpaceTreeNode<?> find(String id) {
 		return _model.find(id);
 	}
 
 	public String getAddNodeJson() {
 		return _addNodeJson;
 	}
+	
+	public void setAddNodeJson(String addNodeJson) {
+		if (!Objects.equals(_addNodeJson, addNodeJson)) {
+			_addNodeJson = addNodeJson;
+		}
+		smartUpdate("addNodeJson", _addNodeJson);
+	}
 
 	public String getAlign() {
 		return _align;
+	}
+	
+	public void setAlign(String align) {
+		if (!Objects.equals(_align, align)
+				&& ("left".equals(align) || "center".equals(align) || "right"
+						.equals(align))) {
+			_align = align;
+			smartUpdate("align", _align);
+		}
+	}
+
+	public SpaceTreeRenderer getSpaceTreeRenderer() {
+		return _renderer;
+	}
+
+	public void setSpaceTreeRenderer(SpaceTreeRenderer _renderer) {
+		this._renderer = _renderer;
 	}
 
 	public String getCmd() {
 		return _cmd;
 	}
+	
+	public void setCmd(String cmd) {
+		if (!Objects.equals(_cmd, cmd)
+				&& ("add".equals(cmd) || "remove".equals(cmd) || "refresh"
+						.equals(cmd))) {
+			_cmd = cmd;
+		}
+		smartUpdate("cmd", _cmd);
+	}
 
 	public int getDuration() {
 		return _duration;
+	}
+	
+	public void setDuration(int duration) {
+		if (_duration != duration && duration >= 0) {
+			_duration = duration;
+			smartUpdate("duration", _duration);
+		}
 	}
 
 	public String getJson() {
 		return _json;
 	}
+	
+	public void setJson(String json) {
+		if (!Objects.equals(_json, json)) {
+			_json = json;
+			smartUpdate("json", _json);
+		}
+	}
 
 	public int getLevel() {
 		return _level;
 	}
+	
+	public void setLevel(int level) {
+		if (_level != level) {
+			_level = level;
+			smartUpdate("level", _level);
+		}
+	}
 
-	public SpaceTreeModel<E> getModel() {
+	public SpaceTreeModel<?> getModel() {
 		return _model;
+	}
+	
+	public void setModel(SpaceTreeModel<?> model) {
+		if (model != null) {
+			if (!(model instanceof SpaceTreeModel))
+				throw new UiException(model.getClass() + " must implement "
+						+ SpaceTreeModel.class);
+
+			SpaceTreeNode<?> root = (SpaceTreeNode<?>) model.getRoot();
+			SpaceTreeNode<?> spacetreeRoot = model.getSpaceTreeRoot();
+			if (init) {
+				setSelectedNode(spacetreeRoot);
+				init = false;
+			}
+			if (_model != model) {
+				if (_model != null) {
+					_model.removeTreeDataListener(_dataListener);
+				}
+				// to ensure spacetree root should be unique
+				for (TreeNode<?> child : root.getChildren()) {
+					if (spacetreeRoot == child) {
+						continue;
+					}
+					root.remove((SpaceTreeNode) child);
+				}
+				_model = (SpaceTreeModel<?>) model;
+				initDataListener();
+			}
+			postOnInitRender();
+		} else if (_model != null) {
+			_model.removeTreeDataListener(_dataListener);
+			_model = null;
+		}
 	}
 
 	public String getNodetype() {
 		return _nodetype;
 	}
+	
+	public void setNodetype(String nodetype) {
+		if (!Objects.equals(_nodetype, nodetype)) {
+			_nodetype = nodetype;
+			smartUpdate("nodetype", _nodetype);
+		}
+	}
 
 	public String getOrient() {
 		return _orient;
+	}
+	
+	public void setOrient(String orient) {
+		if (!Objects.equals(_orient, orient)
+				&& ("left".equals(orient) || "right".equals(orient)
+						|| "top".equals(orient) || "bottom".equals(orient))) {
+			_orient = orient;
+			smartUpdate("orient", _orient);
+		}
+	}
+	
+	public SpaceTreeNode<?> getSelectedNode() {
+		return _sel;
+	}
+
+	public void setSelectedNode(SpaceTreeNode<?> sel) {
+		if (!Objects.equals(_sel, sel)) {
+			_sel = sel;
+			smartUpdate("selectedNode", new Renderer().render(_sel, "{}"));
+		}
+	}
+	
+	private void setJsonWithoutUpdate() {
+		SpaceTreeNode<?> spacetreeRoot = (SpaceTreeNode<?>) _model
+				.getSpaceTreeRoot();
+		final Renderer renderer = new Renderer();
+		try {
+			_json = renderChildren(renderer, spacetreeRoot);
+		} catch (Throwable ex) {
+			renderer.doCatch(ex);
+		} finally {
+			renderer.doFinally();
+		}
 	}
 
 	/**
 	 * Returns the renderer used to render items.
 	 */
 	@SuppressWarnings("unchecked")
-	public SpaceTreeNodeRenderer getRealRenderer() {
+	private SpaceTreeRenderer getRealRenderer() {
 		return _renderer != null ? _renderer : _defRend;
-	}
-
-	public SpaceTreeNode<E> getSelectedNode() {
-		return _sel;
 	}
 
 	/**
@@ -231,27 +353,26 @@ public class OrgChart<E> extends XulElement {
 	private void onTreeDataChange(TreeDataEvent event) {
 		final int type = event.getType();
 		final int[] path = event.getPath();
-		final TreeModel<E> tm = event.getModel();
+		final TreeModel<?> tm = event.getModel();
 
-		SpaceTreeNode<E> node = null;
+		SpaceTreeNode<?> node = null;
 		if (path == null) {
-			node = (SpaceTreeNode<E>) _model.getSpaceTreeRoot();
+			node = (SpaceTreeNode<?>) _model.getSpaceTreeRoot();
 		} else {
-			node = (SpaceTreeNode<E>) event.getModel().getChild(path);
+			node = (SpaceTreeNode<?>) event.getModel().getChild(path);
 		}
 
 		if (node != null)
 			switch (type) {
 			case TreeDataEvent.INTERVAL_ADDED:
-				SpaceTreeNode<E> lastChild = (SpaceTreeNode<E>) node
+				SpaceTreeNode<?> lastChild = (SpaceTreeNode<?>) node
 						.getChildAt(node.getChildCount() - 1);
-
-				setAddNodeJson(new Renderer().render(node, "{}"));
+				setAddNodeJson(new Renderer().render(lastChild, "{}"));
 				setJsonWithoutUpdate();
 				setCmd("add");
 				return;
 			case TreeDataEvent.INTERVAL_REMOVED:
-				_model.addToSelection(node);
+				_model.addToSelection((TreeNode) node);
 				setJsonWithoutUpdate();
 				setCmd("remove");
 				return;
@@ -263,19 +384,6 @@ public class OrgChart<E> extends XulElement {
 
 	}
 
-	private void setJsonWithoutUpdate() {
-		SpaceTreeNode<E> spacetreeRoot = (SpaceTreeNode<E>) _model
-				.getSpaceTreeRoot();
-		final Renderer renderer = new Renderer();
-		try {
-			_json = renderChildren(renderer, spacetreeRoot);
-		} catch (Throwable ex) {
-			renderer.doCatch(ex);
-		} finally {
-			renderer.doFinally();
-		}
-	}
-
 	private void postOnInitRender() {
 		// 20080724, Henri Chen: optimize to avoid postOnInitRender twice
 		if (getAttribute(ATTR_ON_INIT_RENDER_POSTED) == null) {
@@ -284,7 +392,7 @@ public class OrgChart<E> extends XulElement {
 		}
 	}
 
-	private String renderChildren(Renderer renderer, SpaceTreeNode<E> node)
+	private String renderChildren(Renderer renderer, SpaceTreeNode<?> node)
 			throws Throwable {
 		return renderer.render(node);
 	}
@@ -316,7 +424,7 @@ public class OrgChart<E> extends XulElement {
 	}
 
 	private void renderTree() {
-		SpaceTreeNode<E> node = (SpaceTreeNode<E>) _model.getSpaceTreeRoot();
+		SpaceTreeNode<?> node = (SpaceTreeNode<?>) _model.getSpaceTreeRoot();
 		final Renderer renderer = new Renderer();
 		try {
 			setJson(renderChildren(renderer, node));
@@ -342,114 +450,13 @@ public class OrgChart<E> extends XulElement {
 		if (Events.ON_SELECT.equals(cmd) || Events.ON_USER.equals(cmd)) {
 			String seldNodeStr = data.get("selectedNode").toString();
 			JSONObject json = (JSONObject) JSONValue.parse(seldNodeStr);
-			SpaceTreeNode<E> seldNode = find(json.get("id").toString());
-			_model.addToSelection(seldNode);
+			SpaceTreeNode<?> seldNode = find(json.get("id").toString());
+			_model.addToSelection((TreeNode) seldNode);
 			setSelectedNode(seldNode);
 			Events.postEvent(evt);
 		} else {
 			super.service(request, everError);
 		}
 	}
-
-	public void setAddNodeJson(String addNodeJson) {
-		if (!Objects.equals(_addNodeJson, addNodeJson)) {
-			_addNodeJson = addNodeJson;
-		}
-		smartUpdate("addNodeJson", _addNodeJson);
-	}
-
-	public void setAlign(String align) {
-		if (!Objects.equals(_align, align)
-				&& ("left".equals(align) || "center".equals(align) || "right"
-						.equals(align))) {
-			_align = align;
-			smartUpdate("align", _align);
-		}
-	}
-
-	public void setCmd(String cmd) {
-		if (!Objects.equals(_cmd, cmd)
-				&& ("add".equals(cmd) || "remove".equals(cmd) || "refresh"
-						.equals(cmd))) {
-			_cmd = cmd;
-		}
-		smartUpdate("cmd", _cmd);
-	}
-
-	public void setDuration(int duration) {
-		if (_duration != duration && duration >= 0) {
-			_duration = duration;
-			smartUpdate("duration", _duration);
-		}
-	}
-
-	public void setJson(String json) {
-		if (!Objects.equals(_json, json)) {
-			_json = json;
-			smartUpdate("json", _json);
-		}
-	}
-
-	public void setLevel(int level) {
-		if (_level != level) {
-			_level = level;
-			smartUpdate("level", _level);
-		}
-	}
-
-	public void setModel(SpaceTreeModel<E> model) {
-		if (model != null) {
-			if (!(model instanceof SpaceTreeModel))
-				throw new UiException(model.getClass() + " must implement "
-						+ SpaceTreeModel.class);
-
-			SpaceTreeNode<E> root = (SpaceTreeNode<E>) model.getRoot();
-			SpaceTreeNode<E> spacetreeRoot = model.getSpaceTreeRoot();
-			if (init) {
-				setSelectedNode(spacetreeRoot);
-				init = false;
-			}
-			if (_model != model) {
-				if (_model != null) {
-					_model.removeTreeDataListener(_dataListener);
-				}
-				// to ensure spacetree root should be unique
-				for (TreeNode<E> child : root.getChildren()) {
-					if (spacetreeRoot == child) {
-						continue;
-					}
-					root.remove(child);
-				}
-				_model = (SpaceTreeModel<E>) model;
-				initDataListener();
-			}
-			postOnInitRender();
-		} else if (_model != null) {
-			_model.removeTreeDataListener(_dataListener);
-			_model = null;
-		}
-	}
-
-	public void setNodetype(String nodetype) {
-		if (!Objects.equals(_nodetype, nodetype)) {
-			_nodetype = nodetype;
-			smartUpdate("nodetype", _nodetype);
-		}
-	}
-
-	public void setOrient(String orient) {
-		if (!Objects.equals(_orient, orient)
-				&& ("left".equals(orient) || "right".equals(orient)
-						|| "top".equals(orient) || "bottom".equals(orient))) {
-			_orient = orient;
-			smartUpdate("orient", _orient);
-		}
-	}
-
-	public void setSelectedNode(SpaceTreeNode<E> sel) {
-		if (!Objects.equals(_sel, sel)) {
-			_sel = sel;
-			smartUpdate("selectedNode", new Renderer().render(_sel, "{}"));
-		}
-	}
+	
 }

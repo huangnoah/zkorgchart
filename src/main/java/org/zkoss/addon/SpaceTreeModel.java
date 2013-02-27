@@ -21,6 +21,10 @@ public class SpaceTreeModel<E> extends DefaultTreeModel<E> {
 		else
 			return null;
 	}
+	
+	public SpaceTreeNode<E> getSelectedNode() {
+		return (SpaceTreeNode<E>) getSelection().iterator().next();
+	}
 
 	public SpaceTreeNode<E> find(String id) {
 		return query((TreeNode<E>) getRoot(), id,
