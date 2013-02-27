@@ -46,6 +46,8 @@ addon.OrgChart = zk.$extends(zul.Widget, {
 	_cmd : '',
 	_removing : false,
 	_adding : false,
+	_orienting : false,
+	_aligning : false,
 	_addNodeJson : '{"id": 2, "name": 2}',
 	/**
 	 * Don't use array/object as a member field, it's a restriction for ZK
@@ -75,6 +77,8 @@ addon.OrgChart = zk.$extends(zul.Widget, {
 		},
 		addNodeJson : _zkf,
 		adding : _zkf,
+		orienting : _zkf,
+		aligning : _zkf,
 		removing : _zkf,
 		level : _render = function() {
 			if (this.desktop) {
@@ -86,13 +90,23 @@ addon.OrgChart = zk.$extends(zul.Widget, {
 		orient : function() {
 			if (this.desktop) {
 				var component = this;
-				component._st.switchPosition(this._orient, "animate");
+				component._orienting = true;
+				component._st.switchPosition(this._orient, "animate", {
+					onComplete : function() {
+						component._orienting = false;
+					}
+				});
 			}
 		},
 		align : function() {
 			if (this.desktop) {
 				var component = this;
-				component._st.switchAlignment(this._align, "replot");
+				component._aligning = true;
+				component._st.switchAlignment(this._align, "replot", {
+					onComplete : function() {
+						component._aligning = false;
+					}
+				});
 			}
 		},
 		json : function(val) {
