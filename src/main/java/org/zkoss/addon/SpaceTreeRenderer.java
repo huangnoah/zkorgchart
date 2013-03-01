@@ -1,5 +1,7 @@
 package org.zkoss.addon;
 
+import org.zkoss.zk.ui.Component;
+
 public interface SpaceTreeRenderer<T> {
-	String render(T data);
+	String render(Component owner, T data);
 }

@@ -7,10 +7,15 @@ import java.util.Map;
 import org.zkoss.json.JSONObject;
 import org.zkoss.json.JSONValue;
 import org.zkoss.lang.Objects;
+import org.zkoss.xel.VariableResolver;
 import org.zkoss.zk.au.AuRequest;
+import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.UiException;
+import org.zkoss.zk.ui.WrongValueException;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zk.ui.event.SelectEvent;
+import org.zkoss.zk.ui.util.Template;
+import org.zkoss.zul.Label;
 import org.zkoss.zul.RendererCtrl;
 import org.zkoss.zul.TreeModel;
 import org.zkoss.zul.TreeNode;
@@ -70,7 +75,7 @@ public class OrgChart extends XulElement {
 			try {
 				try {
 					json.put("id", node.getId());
-					json.put("name", _renderer.render(node.getData()));
+					json.put("name", _renderer.render(owner, node.getData()));
 
 					if (node.isLeaf())
 						json.put("children", "null");
@@ -115,8 +120,8 @@ public class OrgChart extends XulElement {
 	static {
 		addClientEvent(OrgChart.class, Events.ON_SELECT, CE_DUPLICATE_IGNORE
 				| CE_IMPORTANT);
-		addClientEvent(OrgChart.class, Events.ON_USER, CE_IMPORTANT);
 	}
+	private Component owner = this;
 	private String _align = "center";
 	private int _duration = 700;
 	private int _level = 2;
@@ -133,8 +138,29 @@ public class OrgChart extends XulElement {
 	private static final String ATTR_ON_INIT_RENDER_POSTED = "org.zkoss.zul.Tree.onInitLaterPosted";
 	private static final SpaceTreeRenderer _defRend = new SpaceTreeRenderer() {
 		@Override
-		public String render(Object node) {
-			return Objects.toString(node);
+		public String render(final Component owner, final Object data) {
+			final OrgChart self = (OrgChart) owner;
+			final Template tm = self.getTemplate("model");
+			if (tm == null)
+				return Objects.toString(data);
+			else {
+				final Component[] items = tm.create(owner, null,
+						new VariableResolver() {
+							public Object resolveVariable(String name) {
+								return "each".equals(name) ? data : null;
+							}
+						}, null);
+				if (items.length != 1)
+					throw new UiException(
+							"The model template must have exactly one item, not "
+									+ items.length);
+				if (!(items[0] instanceof Label))
+					throw new UiException(
+							"The model template can only support Label component, not "
+									+ items[0]);
+				items[0].detach();
+				return ((Label) items[0]).getValue();
+			}
 		}
 	};
 
@@ -142,11 +168,11 @@ public class OrgChart extends XulElement {
 		return _model.find(id);
 	}
 
-	public String getAddNodeJson() {
+	private String getAddNodeJson() {
 		return _addNodeJson;
 	}
-	
-	public void setAddNodeJson(String addNodeJson) {
+
+	private void setAddNodeJson(String addNodeJson) {
 		if (!Objects.equals(_addNodeJson, addNodeJson)) {
 			_addNodeJson = addNodeJson;
 		}
@@ -156,11 +182,12 @@ public class OrgChart extends XulElement {
 	public String getAlign() {
 		return _align;
 	}
-	
+
 	public void setAlign(String align) {
-		if (!Objects.equals(_align, align)
-				&& ("left".equals(align) || "center".equals(align) || "right"
-						.equals(align))) {
+		if (!"left".equals(align) && !"center".equals(align)
+				&& !"right".equals(align))
+			throw new WrongValueException("Illegal align: " + align);
+		if (!Objects.equals(_align, align)) {
 			_align = align;
 			smartUpdate("align", _align);
 		}
@@ -174,11 +201,11 @@ public class OrgChart extends XulElement {
 		this._renderer = _renderer;
 	}
 
-	public String getCmd() {
+	private String getCmd() {
 		return _cmd;
 	}
-	
-	public void setCmd(String cmd) {
+
+	private void setCmd(String cmd) {
 		if (!Objects.equals(_cmd, cmd)
 				&& ("add".equals(cmd) || "remove".equals(cmd) || "refresh"
 						.equals(cmd))) {
@@ -190,7 +217,7 @@ public class OrgChart extends XulElement {
 	public int getDuration() {
 		return _duration;
 	}
-	
+
 	public void setDuration(int duration) {
 		if (_duration != duration && duration >= 0) {
 			_duration = duration;
@@ -198,11 +225,11 @@ public class OrgChart extends XulElement {
 		}
 	}
 
-	public String getJson() {
+	private String getJson() {
 		return _json;
 	}
-	
-	public void setJson(String json) {
+
+	private void setJson(String json) {
 		if (!Objects.equals(_json, json)) {
 			_json = json;
 			smartUpdate("json", _json);
@@ -212,7 +239,7 @@ public class OrgChart extends XulElement {
 	public int getLevel() {
 		return _level;
 	}
-	
+
 	public void setLevel(int level) {
 		if (_level != level) {
 			_level = level;
@@ -223,7 +250,7 @@ public class OrgChart extends XulElement {
 	public SpaceTreeModel<?> getModel() {
 		return _model;
 	}
-	
+
 	public void setModel(SpaceTreeModel<?> model) {
 		if (model != null) {
 			if (!(model instanceof SpaceTreeModel))
@@ -260,7 +287,7 @@ public class OrgChart extends XulElement {
 	public String getNodetype() {
 		return _nodetype;
 	}
-	
+
 	public void setNodetype(String nodetype) {
 		if (!Objects.equals(_nodetype, nodetype)) {
 			_nodetype = nodetype;
@@ -271,16 +298,17 @@ public class OrgChart extends XulElement {
 	public String getOrient() {
 		return _orient;
 	}
-	
+
 	public void setOrient(String orient) {
-		if (!Objects.equals(_orient, orient)
-				&& ("left".equals(orient) || "right".equals(orient)
-						|| "top".equals(orient) || "bottom".equals(orient))) {
+		if (!"left".equals(orient) && !"right".equals(orient)
+				&& !"top".equals(orient) && !"bottom".equals(orient))
+			throw new WrongValueException("Illegal orient: " + orient);
+		if (!Objects.equals(_orient, orient)) {
 			_orient = orient;
 			smartUpdate("orient", _orient);
 		}
 	}
-	
+
 	public SpaceTreeNode<?> getSelectedNode() {
 		return _sel;
 	}
@@ -291,7 +319,7 @@ public class OrgChart extends XulElement {
 			smartUpdate("selectedNode", new Renderer().render(_sel, "{}"));
 		}
 	}
-	
+
 	private void setJsonWithoutUpdate() {
 		SpaceTreeNode<?> spacetreeRoot = (SpaceTreeNode<?>) _model
 				.getSpaceTreeRoot();
@@ -372,7 +400,8 @@ public class OrgChart extends XulElement {
 				setCmd("add");
 				return;
 			case TreeDataEvent.INTERVAL_REMOVED:
-				_model.addToSelection((TreeNode) node);
+				_model.clearSelection();
+				_sel = null;
 				setJsonWithoutUpdate();
 				setCmd("remove");
 				return;
@@ -437,17 +466,12 @@ public class OrgChart extends XulElement {
 		Events.postEvent(ZulEvents.ON_AFTER_RENDER, this, null);
 	}
 
-	/**
-	 * After remove(child) is completed in client, the selected node should be
-	 * the parent node. In this moment, onSelect event should not be trigger, so
-	 * we have to replace onSelect event with onUser event.
-	 */
 	public void service(AuRequest request, boolean everError) {
 		final String cmd = request.getCommand();
 		SelectEvent evt = SelectEvent.getSelectEvent(request);
 		Map data = request.getData();
 
-		if (Events.ON_SELECT.equals(cmd) || Events.ON_USER.equals(cmd)) {
+		if (Events.ON_SELECT.equals(cmd)) {
 			String seldNodeStr = data.get("selectedNode").toString();
 			JSONObject json = (JSONObject) JSONValue.parse(seldNodeStr);
 			SpaceTreeNode<?> seldNode = find(json.get("id").toString());
@@ -458,5 +482,5 @@ public class OrgChart extends XulElement {
 			super.service(request, everError);
 		}
 	}
-	
+
 }

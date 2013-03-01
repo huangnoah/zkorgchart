@@ -2,6 +2,9 @@
 	<window id="mainWin" apply="test.ctrl.SpaceTreeComposer">
 		<orgchart id="myComp" level="3" nodetype="circle" duration="250"
 			orient="right" align="right">
+			<template name="model">
+				<label value="${each.getName()}"></label>
+			</template>
 		</orgchart>
 		<vbox height="100%" width="100%" pack="center" align="center">
 			<grid width="600px">
