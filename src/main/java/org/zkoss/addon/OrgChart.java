@@ -14,7 +14,9 @@ import org.zkoss.zk.ui.UiException;
 import org.zkoss.zk.ui.WrongValueException;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zk.ui.event.SelectEvent;
+import org.zkoss.zk.ui.util.ForEachStatus;
 import org.zkoss.zk.ui.util.Template;
+import org.zkoss.zul.ItemRenderer;
 import org.zkoss.zul.Label;
 import org.zkoss.zul.RendererCtrl;
 import org.zkoss.zul.TreeModel;
@@ -29,7 +31,7 @@ public class OrgChart extends XulElement {
 
 	/** Used to render treeitem if _model is specified. */
 	private class Renderer implements java.io.Serializable {
-		private final SpaceTreeRenderer _renderer;
+		private final ItemRenderer _renderer;
 		private boolean _rendered, _ctrled;
 
 		private Renderer() {
@@ -75,7 +77,7 @@ public class OrgChart extends XulElement {
 			try {
 				try {
 					json.put("id", node.getId());
-					json.put("name", _renderer.render(owner, node.getData()));
+					json.put("name", _renderer.render(owner, node.getData(), node.getId()));
 
 					if (node.isLeaf())
 						json.put("children", "null");
@@ -133,12 +135,12 @@ public class OrgChart extends XulElement {
 	private String _cmd = "";
 	private String _addNodeJson = "{}";
 	private boolean init = true;
-	private transient SpaceTreeRenderer _renderer;
+	private transient ItemRenderer _renderer;
 	private transient TreeDataListener _dataListener;
 	private static final String ATTR_ON_INIT_RENDER_POSTED = "org.zkoss.zul.Tree.onInitLaterPosted";
-	private static final SpaceTreeRenderer _defRend = new SpaceTreeRenderer() {
+	private static final ItemRenderer _defRend = new ItemRenderer() {
 		@Override
-		public String render(final Component owner, final Object data) {
+		public String render(final Component owner, final Object data, final int index) {
 			final OrgChart self = (OrgChart) owner;
 			final Template tm = self.getTemplate("model");
 			if (tm == null)
@@ -147,7 +149,34 @@ public class OrgChart extends XulElement {
 				final Component[] items = tm.create(owner, null,
 						new VariableResolver() {
 							public Object resolveVariable(String name) {
-								return "each".equals(name) ? data : null;
+								if ("each".equals(name)) {
+									return data;
+								} else if ("forEachStatus".equals(name)) {
+									return new ForEachStatus() {
+										@Override
+										public ForEachStatus getPrevious() {
+											return null;
+										}
+										@Override
+										public Object getEach() {
+											return data;
+										}
+										@Override
+										public int getIndex() {
+											return index;
+										}
+										@Override
+										public Integer getBegin() {
+											return 0;
+										}
+										@Override
+										public Integer getEnd() {
+											throw new UnsupportedOperationException("end not available");
+										}
+									};
+								} else {
+									return null;
+								}
 							}
 						}, null);
 				if (items.length != 1)
@@ -193,11 +222,11 @@ public class OrgChart extends XulElement {
 		}
 	}
 
-	public SpaceTreeRenderer getSpaceTreeRenderer() {
+	public ItemRenderer getItemRenderer() {
 		return _renderer;
 	}
 
-	public void setSpaceTreeRenderer(SpaceTreeRenderer _renderer) {
+	public void setItemRenderer(ItemRenderer _renderer) {
 		this._renderer = _renderer;
 	}
 
@@ -206,9 +235,10 @@ public class OrgChart extends XulElement {
 	}
 
 	private void setCmd(String cmd) {
-		if (!Objects.equals(_cmd, cmd)
-				&& ("add".equals(cmd) || "remove".equals(cmd) || "refresh"
-						.equals(cmd))) {
+		if (!"add".equals(cmd) && !"remove".equals(cmd)
+				&& !"refresh".equals(cmd))
+			throw new WrongValueException("Illegal cmd: " + cmd);
+		if (!Objects.equals(_cmd, cmd)) {
 			_cmd = cmd;
 		}
 		smartUpdate("cmd", _cmd);
@@ -289,6 +319,9 @@ public class OrgChart extends XulElement {
 	}
 
 	public void setNodetype(String nodetype) {
+		if (!"circle".equals(nodetype) && !"rectangle".equals(nodetype)
+				&& !"square".equals(nodetype) && !"ellipse".equals(nodetype))
+			throw new WrongValueException("Illegal nodetype: " + nodetype);
 		if (!Objects.equals(_nodetype, nodetype)) {
 			_nodetype = nodetype;
 			smartUpdate("nodetype", _nodetype);
@@ -313,7 +346,7 @@ public class OrgChart extends XulElement {
 		return _sel;
 	}
 
-	public void setSelectedNode(SpaceTreeNode<?> sel) {
+	private void setSelectedNode(SpaceTreeNode<?> sel) {
 		if (!Objects.equals(_sel, sel)) {
 			_sel = sel;
 			smartUpdate("selectedNode", new Renderer().render(_sel, "{}"));
@@ -337,7 +370,7 @@ public class OrgChart extends XulElement {
 	 * Returns the renderer used to render items.
 	 */
 	@SuppressWarnings("unchecked")
-	private SpaceTreeRenderer getRealRenderer() {
+	private ItemRenderer getRealRenderer() {
 		return _renderer != null ? _renderer : _defRend;
 	}
 
@@ -409,6 +442,8 @@ public class OrgChart extends XulElement {
 				renderTree();
 				setCmd("refresh");
 				return;
+			case TreeDataEvent.SELECTION_CHANGED:
+				setSelectedNode(node);
 			}
 
 	}
@@ -476,7 +511,6 @@ public class OrgChart extends XulElement {
 			JSONObject json = (JSONObject) JSONValue.parse(seldNodeStr);
 			SpaceTreeNode<?> seldNode = find(json.get("id").toString());
 			_model.addToSelection((TreeNode) seldNode);
-			setSelectedNode(seldNode);
 			Events.postEvent(evt);
 		} else {
 			super.service(request, everError);

@@ -34,11 +34,8 @@ addon.OrgChart = zk.$extends(zul.Widget, {
 	_addNodeJson : '{"id": 2, "name": 2}',
 
 	$define : {
-		selectedNode : _zkf = function() {
-			if (this.desktop) {
-			}
-		},
-		addNodeJson : _zkf,
+		selectedNode : null,
+		addNodeJson : null,
 		level : _render = function() {
 			if (this.desktop) {
 				this.rerender();

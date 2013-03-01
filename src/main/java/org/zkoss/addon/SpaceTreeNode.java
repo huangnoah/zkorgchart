@@ -6,14 +6,14 @@ import org.zkoss.zul.DefaultTreeNode;
 
 public class SpaceTreeNode<E> extends DefaultTreeNode<E> {
 
-	private static long genId = 0;
-	private long id;
+	private static int genId = 0;
+	private int id;
 	public SpaceTreeNode(E data, Collection<SpaceTreeNode<E>> children) {
 		super(data, children);
 		id = genId++;
 	}
 
-	public long getId() {
+	public int getId() {
 		return id;
 	}
 
