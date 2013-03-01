@@ -290,7 +290,11 @@ public class OrgChart extends XulElement {
 			SpaceTreeNode<?> root = (SpaceTreeNode<?>) model.getRoot();
 			SpaceTreeNode<?> spacetreeRoot = model.getSpaceTreeRoot();
 			if (init) {
-				setSelectedNode(spacetreeRoot);
+				SpaceTreeNode seldNode = model.getSelectedNode();
+				if(seldNode != null)
+					setSelectedNode(seldNode);
+				else 
+					setSelectedNode(spacetreeRoot);
 				init = false;
 			}
 			if (_model != model) {

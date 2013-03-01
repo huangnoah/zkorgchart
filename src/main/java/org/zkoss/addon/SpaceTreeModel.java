@@ -1,6 +1,7 @@
 package org.zkoss.addon;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -21,9 +22,13 @@ public class SpaceTreeModel<E> extends DefaultTreeModel<E> {
 		else
 			return null;
 	}
-	
+
 	public SpaceTreeNode<E> getSelectedNode() {
-		return (SpaceTreeNode<E>) getSelection().iterator().next();
+		Iterator iter = getSelection().iterator();
+		if (iter.hasNext())
+			return (SpaceTreeNode<E>) iter.next();
+		else
+			return null;
 	}
 
 	public SpaceTreeNode<E> find(String id) {
@@ -38,7 +43,7 @@ public class SpaceTreeModel<E> extends DefaultTreeModel<E> {
 		// check children
 		for (TreeNode<E> rawChild : node.getChildren()) {
 			SpaceTreeNode<E> child = (SpaceTreeNode<E>) rawChild;
-			String childId = child.getId() + ""; 
+			String childId = child.getId() + "";
 
 			if (checked.get(childId) != null) {
 				// if it checked, then skip
@@ -74,5 +79,5 @@ public class SpaceTreeModel<E> extends DefaultTreeModel<E> {
 		}
 
 	}
-	
+
 }

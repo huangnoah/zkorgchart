@@ -62,9 +62,9 @@ public class SpaceTreeComposer extends SelectorComposer<Window> {
 		// });
 
 		SpaceTreeModel model = new SpaceTreeModel(root);
-		myComp.setModel(model);
-		
 		model.addToSelection(mary);
+		
+		myComp.setModel(model);
 	}
 
 	@Listen("onClick= #add")
