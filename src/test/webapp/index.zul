@@ -3,7 +3,7 @@
 		<orgchart id="myComp" level="3" nodetype="circle" duration="250"
 			orient="right" align="right">
 			<template name="model">
-				<label value="${each.getName()}"></label>
+				<label value="${each.name}"></label>
 			</template>
 		</orgchart>
 		<vbox height="100%" width="100%" pack="center" align="center">

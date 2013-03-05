@@ -1,8 +1,8 @@
 # Orgchart: a tree browser offers a convenient way to display data
 
-## Introduct
+## Introduction
 
-  Orgchart is a tree browser (or call **SpaceTree**) that offers a convenient way to display data. It consists of nodes and paths, and the paths represent the links connecting these nodes. You can expand or collapse individual nodes in the tree to show or hide its children. And you can change the attributes to affect how the tree is displayed. For example, use the **level** to adjust the number of levels that are shown in the tree. 
+  The Orgchart is a tree browser (or call **SpaceTree**) that offers a convenient way to display data. (inspired by [JavaScript InfoVis Toolkit](http://philogb.github.com/jit/demos.html)) It consists of nodes and paths, and the paths represent the links connecting these nodes. You can expand or collapse individual nodes in the tree to show or hide its children. And you can change the attributes to affect how the tree is displayed. For example, use the **level** to adjust the number of levels that are shown in the tree. 
 
 ## Example
 
@@ -21,7 +21,7 @@ We have also added button for adding, removing a new node feature.
 			<orgchart id="myComp" level="3" nodetype="circle"
 				duration="250" orient="right" align="right">
 				<template name="model">
-					<label value="${each.getName()}"></label>
+					<label value="${each.name}"></label>
 				</template>
 			</orgchart>
 			<button id="add" label="add" />
@@ -34,8 +34,8 @@ Now, we can put the staffs information into Java bean (or the data of node) whic
 
 ### Put the staffs information into Java Bean
 
-The **UserDataBean** represents the data of **SpaceTreeNode**.
-The result of toString() will be the node label if you don't use template tag in zul and customize the item renderer in composer.  
+The **UserDataBean** represents the data of **SpaceTreeNode** and the **SpaceTreeNode**s make up the **SpaceTree**.
+The result of **toString()** will be the node label if you don't use template tag in zul and customize the item renderer in composer.  
 
 **JavaBean**
   
@@ -51,27 +51,6 @@ The result of toString() will be the node label if you don't use template tag in
 		}
 		
 		// constructor, getter and setter
-	
-	}
-
-**SpaceTreeNode**
-
-	public class SpaceTreeNode<E> extends DefaultTreeNode<E> {
-
-		private static int genId = 0;
-		private int id;
-		public SpaceTreeNode(E data, Collection<SpaceTreeNode<E>> children) {
-			super(data, children);
-			id = genId++;
-		}
-	
-		public int getId() {
-			return id;
-		}
-	
-		public boolean hasChildren() {
-			return getChildren() != null && getChildren().size() != 0;
-		}
 	
 	}
     
