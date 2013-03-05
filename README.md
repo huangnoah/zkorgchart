@@ -35,7 +35,7 @@ Now, we can put the staffs information into Java bean (or the data of node) whic
 ### Put the staffs information into Java Bean
 
 The **UserDataBean** represents the data of **SpaceTreeNode** and the **SpaceTreeNode**s make up the **SpaceTree**.
-The result of **toString()** will be the node label if you don't use template tag in zul and customize the item renderer in composer.  
+You should use template tag in zul or customize the item renderer in composer to generate the value which shows on the node label, or by default the value will be object#toString().  
 
 **JavaBean**
   
@@ -45,10 +45,11 @@ The result of **toString()** will be the node label if you don't use template ta
 		private String name;
 		private int age;
 	
-		@Override
-		public String toString() {
-			return name + " (" + age + ")";
-		}
+		// customize toString() if you want to use it.
+    	// @Override
+    	// public String toString() {
+    	//     return name + " (" + age + ")";
+    	// }
 		
 		// constructor, getter and setter
 	
@@ -58,7 +59,7 @@ The result of **toString()** will be the node label if you don't use template ta
 
 Create some SpaceTree nodes and combine all nodes together.
 The ItemRenderer is used to customize the value which shows on the node label.
-The component will call the default renderer which regards **org.zkoss.lang.Objects.toString(yourBean)** as the node label if you don't customize the renderer.  
+You can customize the item renderer if you don't want to use template tag in zul or override object#toString().  
 
 **Composer**
   
@@ -103,7 +104,7 @@ The component will call the default renderer which regards **org.zkoss.lang.Obje
 			rootChild.add(spacetreeRoot);
 			SpaceTreeNode<UserDataBean> root = new SpaceTreeNode(null, rootChild);
 	
-			// customize your renderer
+			// customize your renderer, the data means your bean, and index means the node id
 			// myComp.setItemRenderer(new ItemRenderer() {
 			// @Override
 			// public String render(Component owner, Object data, int index) {

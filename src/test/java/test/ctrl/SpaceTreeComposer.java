@@ -53,7 +53,7 @@ public class SpaceTreeComposer extends SelectorComposer<Window> {
 		rootChild.add(spacetreeRoot);
 		SpaceTreeNode<UserDataBean> root = new SpaceTreeNode(null, rootChild);
 
-		// customize your renderer
+		// customize your renderer, the data means your bean, and index means the node id
 		// myComp.setItemRenderer(new ItemRenderer() {
 		// @Override
 		// public String render(Component owner, Object data, int index) {

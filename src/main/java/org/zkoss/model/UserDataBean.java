@@ -19,9 +19,10 @@ public class UserDataBean {
 		this.name = name;
 	}
 
-	@Override
-	public String toString() {
-		return name + " (" + age + ")";
-	}
+	// customize toString() if you want to use it.
+    // @Override
+    // public String toString() {
+    //     return name + " (" + age + ")";
+    // }
 
 }
