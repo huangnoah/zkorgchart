@@ -299,13 +299,6 @@ public class Orgchart extends XulElement {
 				if (_model != null) {
 					_model.removeTreeDataListener(_dataListener);
 				}
-				// to ensure spacetree root should be unique
-				for (TreeNode<?> child : root.getChildren()) {
-					if (spacetreeRoot == child) {
-						continue;
-					}
-					root.remove((SpaceTreeNode) child);
-				}
 				_model = (SpaceTreeModel<?>) model;
 				initDataListener();
 			}
@@ -428,10 +421,20 @@ public class Orgchart extends XulElement {
 			switch (type) {
 			case TreeDataEvent.INTERVAL_ADDED:
 				SpaceTreeNode<?> lastChild = (SpaceTreeNode<?>) node
-						.getChildAt(node.getChildCount() - 1);
-				setAddNodeJson(new Renderer().render(lastChild, "{}"));
-				setJsonWithoutUpdate();
-				setCmd("add");
+				.getChildAt(node.getChildCount() - 1);
+				SpaceTreeNode root = (SpaceTreeNode) _model.getRoot();
+				if(node == root && node.getChildCount() > 1) {
+					try {
+						throw new Exception("the root has one child at most");
+					} catch (Exception e) {
+						e.printStackTrace();
+						lastChild.removeFromParent();
+					}
+				} else {
+					setAddNodeJson(new Renderer().render(lastChild, "{}"));
+					setJsonWithoutUpdate();
+					setCmd("add");
+				}
 				return;
 			case TreeDataEvent.INTERVAL_REMOVED:
 				_model.clearSelection();

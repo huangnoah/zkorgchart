@@ -11,8 +11,11 @@ import org.zkoss.zul.TreeNode;
 @SuppressWarnings("serial")
 public class SpaceTreeModel<E> extends DefaultTreeModel<E> {
 
-	public SpaceTreeModel(SpaceTreeNode<E> root) {
+	public SpaceTreeModel(SpaceTreeNode<E> root) throws Exception {
 		super(root);
+		if(root.getChildCount() > 1) {
+			throw new Exception("the root has one child at most");
+		}
 	}
 
 	public SpaceTreeNode<E> getSpaceTreeRoot() {
