@@ -35,7 +35,7 @@ Now, we can put the staffs information into Java bean (or the data of node) whic
 ### Put the staffs information into Java Bean
 
 The **UserDataBean** represents the data of **SpaceTreeNode** and the **SpaceTreeNode**s make up the **SpaceTree**.
-You should use template tag in zul or customize the item renderer in composer to generate the value which shows on the node label, or by default the value will be object#toString().  
+You can use template tag in zul or customize the item renderer in composer to generate the value which shows on the node label, or by default the value will be object#toString().  
 
 **JavaBean**
   
@@ -44,18 +44,12 @@ You should use template tag in zul or customize the item renderer in composer to
 
 		private String name;
 		private int age;
-	
-		// customize toString() if you want to use it.
-    	// @Override
-    	// public String toString() {
-    	//     return name + " (" + age + ")";
-    	// }
 		
 		// constructor, getter and setter
 	
 	}
     
-### Create the relations and initialize SpaceTree
+### Initialize Spacetree
 
 Create some SpaceTree nodes and combine all nodes together.
 The ItemRenderer is used to customize the value which shows on the node label.
@@ -66,7 +60,7 @@ You can customize the item renderer if you don't want to use template tag in zul
     public class SpaceTreeComposer extends SelectorComposer<Window> {
 
 		@Wire("#myComp")
-		private OrgChart myComp;
+		private Orgchart myComp;
 	
 		public void doAfterCompose(Window comp) throws Exception {
 			super.doAfterCompose(comp);
