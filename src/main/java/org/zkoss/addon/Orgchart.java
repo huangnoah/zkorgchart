@@ -422,18 +422,9 @@ public class Orgchart extends XulElement {
 				SpaceTreeNode<?> lastChild = (SpaceTreeNode<?>) node
 				.getChildAt(node.getChildCount() - 1);
 				SpaceTreeNode root = (SpaceTreeNode) _model.getRoot();
-				if(node == root && node.getChildCount() > 1) {
-					try {
-						throw new Exception("the root has one child at most");
-					} catch (Exception e) {
-						e.printStackTrace();
-						lastChild.removeFromParent();
-					}
-				} else {
-					setAddNodeJson(new Renderer().render(lastChild, "{}"));
-					setJsonWithoutUpdate();
-					setCmd("add");
-				}
+				setAddNodeJson(new Renderer().render(lastChild, "{}"));
+				setJsonWithoutUpdate();
+				setCmd("add");
 				return;
 			case TreeDataEvent.INTERVAL_REMOVED:
 				_model.clearSelection();

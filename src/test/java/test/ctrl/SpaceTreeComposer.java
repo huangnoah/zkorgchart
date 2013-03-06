@@ -1,14 +1,12 @@
 package test.ctrl;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.zkoss.addon.Orgchart;
 import org.zkoss.addon.SpaceTreeModel;
 import org.zkoss.addon.SpaceTreeNode;
 import org.zkoss.zk.ui.select.SelectorComposer;
 import org.zkoss.zk.ui.select.annotation.Listen;
 import org.zkoss.zk.ui.select.annotation.Wire;
+import org.zkoss.zul.TreeNode;
 import org.zkoss.zul.Window;
 
 import test.model.UserDataBean;
@@ -21,39 +19,25 @@ public class SpaceTreeComposer extends SelectorComposer<Window> {
 	public void doAfterCompose(Window comp) throws Exception {
 		super.doAfterCompose(comp);
 
+		SpaceTreeNode<UserDataBean> root = new SpaceTreeNode(null, null);
+		SpaceTreeNode<UserDataBean> spacetreeRoot = new SpaceTreeNode(new UserDataBean("Partick", 23), null);
+		root.add(spacetreeRoot);
+		SpaceTreeNode<UserDataBean> first = new SpaceTreeNode(new UserDataBean("Jason", 1), null);
+		SpaceTreeNode<UserDataBean> second = new SpaceTreeNode(new UserDataBean("Partick", 23), null);
+		spacetreeRoot.add(first);
+		spacetreeRoot.add(second);
 		SpaceTreeNode jack = new SpaceTreeNode(new UserDataBean("Jack", 11),
 				null);
 		SpaceTreeNode mary = new SpaceTreeNode(new UserDataBean("Mary", 12),
 				null);
-
-		List<SpaceTreeNode<UserDataBean>> firstChildren = new ArrayList<SpaceTreeNode<UserDataBean>>();
-		firstChildren.add(jack);
-		firstChildren.add(mary);
-		firstChildren
-				.add(new SpaceTreeNode(new UserDataBean("Jean", 13), null));
-		SpaceTreeNode<UserDataBean> first = new SpaceTreeNode(new UserDataBean(
-				"Jason", 1), firstChildren);
-
-		List<SpaceTreeNode<UserDataBean>> secondChildren = new ArrayList<SpaceTreeNode<UserDataBean>>();
-		secondChildren
-				.add(new SpaceTreeNode(new UserDataBean("Sam", 21), null));
-		secondChildren
-				.add(new SpaceTreeNode(new UserDataBean("Tom", 22), null));
-		secondChildren
-				.add(new SpaceTreeNode(new UserDataBean("Tim", 23), null));
-		SpaceTreeNode<UserDataBean> second = new SpaceTreeNode(
-				new UserDataBean("Partick", 23), secondChildren);
-
-		List<SpaceTreeNode<UserDataBean>> spacetreeRootChildren = new ArrayList<SpaceTreeNode<UserDataBean>>();
-		spacetreeRootChildren.add(first);
-		spacetreeRootChildren.add(second);
-		SpaceTreeNode<UserDataBean> spacetreeRoot = new SpaceTreeNode(
-				new UserDataBean("Peter", 0), spacetreeRootChildren);
-
-		List<SpaceTreeNode<UserDataBean>> rootChild = new ArrayList<SpaceTreeNode<UserDataBean>>();
-		rootChild.add(spacetreeRoot);
-		SpaceTreeNode<UserDataBean> root = new SpaceTreeNode(null, rootChild);
-
+		first.add(jack);
+		first.add(mary);
+		first.add(new SpaceTreeNode(new UserDataBean("Jean", 13), null));
+		second.add(new SpaceTreeNode(new UserDataBean("Sam", 21), null));
+		second.add(new SpaceTreeNode(new UserDataBean("Tom", 22), null));
+		second.add(new SpaceTreeNode(new UserDataBean("Tim", 23), null));
+		
+		
 		// customize your renderer, the data means your bean, and index means the node id
 		// myComp.setItemRenderer(new ItemRenderer() {
 		// @Override
