@@ -213,8 +213,7 @@ public class Orgchart extends XulElement {
 	}
 
 	public void setAlign(String align) {
-		if (!"left".equals(align) && !"center".equals(align)
-				&& !"right".equals(align))
+		if (!"|left|center|right|".contains(align))
 			throw new WrongValueException("Illegal align: " + align);
 		if (!Objects.equals(_align, align)) {
 			_align = align;
@@ -235,8 +234,7 @@ public class Orgchart extends XulElement {
 	}
 
 	private void setCmd(String cmd) {
-		if (!"add".equals(cmd) && !"remove".equals(cmd)
-				&& !"refresh".equals(cmd))
+		if (!"|add|remove|refresh|".contains(cmd))
 			throw new WrongValueException("Illegal cmd: " + cmd);
 		if (!Objects.equals(_cmd, cmd)) {
 			_cmd = cmd;
@@ -323,8 +321,7 @@ public class Orgchart extends XulElement {
 	}
 
 	public void setNodetype(String nodetype) {
-		if (!"circle".equals(nodetype) && !"rectangle".equals(nodetype)
-				&& !"square".equals(nodetype) && !"ellipse".equals(nodetype))
+		if (!"|circle|rectangle|square|ellipse|".contains(nodetype))
 			throw new WrongValueException("Illegal nodetype: " + nodetype);
 		if (!Objects.equals(_nodetype, nodetype)) {
 			_nodetype = nodetype;
