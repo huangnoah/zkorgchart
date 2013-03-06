@@ -3,7 +3,7 @@ package test.ctrl;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.zkoss.addon.OrgChart;
+import org.zkoss.addon.Orgchart;
 import org.zkoss.addon.SpaceTreeModel;
 import org.zkoss.addon.SpaceTreeNode;
 import org.zkoss.model.UserDataBean;
@@ -15,7 +15,7 @@ import org.zkoss.zul.Window;
 public class SpaceTreeComposer extends SelectorComposer<Window> {
 
 	@Wire("#myComp")
-	private OrgChart myComp;
+	private Orgchart myComp;
 
 	public void doAfterCompose(Window comp) throws Exception {
 		super.doAfterCompose(comp);

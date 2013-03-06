@@ -1,5 +1,5 @@
 <language-addon>
-    <addon-name>orgchart</addon-name>
+    <addon-name>Orgchart</addon-name>
   	<version>
 		<version-class>org.zkoss.addon.Version</version-class>
 		<version-uid>0.8.0</version-uid>
@@ -9,8 +9,8 @@
 	<language-name>xul/html</language-name>
 	<component>
 		<component-name>orgchart</component-name> <!-- required -->
-		<component-class>org.zkoss.addon.OrgChart</component-class> <!-- required -->
-		<widget-class>addon.OrgChart</widget-class> <!-- required -->
+		<component-class>org.zkoss.addon.Orgchart</component-class> <!-- required -->
+		<widget-class>addon.Orgchart</widget-class> <!-- required -->
 		<mold>
 			<mold-name>default</mold-name>
 			<mold-uri>mold/orgchart.js</mold-uri>

@@ -57,6 +57,6 @@
 	====
 
 	-->
-	<widget name="OrgChart" />
+	<widget name="Orgchart" />
 	<script src="jit.js" />
 </package>

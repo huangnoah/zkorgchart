@@ -16,7 +16,7 @@ var labelType, useGradients, nativeTextSupport, animate;
 	animate = !(iStuff || !nativeCanvasSupport);
 })();
 
-addon.OrgChart = zk.$extends(zul.Widget, {
+addon.Orgchart = zk.$extends(zul.Widget, {
 	_level : 2,
 	_orient : 'left',
 	_align : 'center',
@@ -142,7 +142,7 @@ addon.OrgChart = zk.$extends(zul.Widget, {
 
 	bind_ : function() {
 
-		this.$supers(addon.OrgChart, 'bind_', arguments);
+		this.$supers(addon.Orgchart, 'bind_', arguments);
 
 		this._st = new $jit.ST(this.initSTOpts_());
 
@@ -164,7 +164,7 @@ addon.OrgChart = zk.$extends(zul.Widget, {
 	unbind_ : function() {
 		this._st = null;
 
-		this.$supers(addon.OrgChart, 'unbind_', arguments);
+		this.$supers(addon.Orgchart, 'unbind_', arguments);
 	},
 
 	initSTOpts_ : function() {

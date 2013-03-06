@@ -27,7 +27,7 @@ import org.zkoss.zul.event.ZulEvents;
 import org.zkoss.zul.impl.XulElement;
 
 @SuppressWarnings("serial")
-public class OrgChart extends XulElement {
+public class Orgchart extends XulElement {
 
 	/** Used to render treeitem if _model is specified. */
 	private class Renderer implements java.io.Serializable {
@@ -120,7 +120,7 @@ public class OrgChart extends XulElement {
 	/* Here's a simple example for how to implements a member field */
 
 	static {
-		addClientEvent(OrgChart.class, Events.ON_SELECT, CE_DUPLICATE_IGNORE
+		addClientEvent(Orgchart.class, Events.ON_SELECT, CE_DUPLICATE_IGNORE
 				| CE_IMPORTANT);
 	}
 	private Component owner = this;
@@ -141,7 +141,7 @@ public class OrgChart extends XulElement {
 	private static final ItemRenderer _defRend = new ItemRenderer() {
 		@Override
 		public String render(final Component owner, final Object data, final int index) {
-			final OrgChart self = (OrgChart) owner;
+			final Orgchart self = (Orgchart) owner;
 			final Template tm = self.getTemplate("model");
 			if (tm == null)
 				return Objects.toString(data);
