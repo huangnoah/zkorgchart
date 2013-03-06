@@ -13,25 +13,20 @@ public class SpaceTreeModel<E> extends DefaultTreeModel<E> {
 
 	public SpaceTreeModel(SpaceTreeNode<E> root) throws Exception {
 		super(root);
-		if(root.getChildCount() > 1) {
+		if (root.getChildCount() > 1) {
 			throw new Exception("the root has one child at most");
 		}
 	}
 
 	public SpaceTreeNode<E> getSpaceTreeRoot() {
-		List<TreeNode<E>> children = getRoot().getChildren();
-		if (children.size() > 0)
-			return (SpaceTreeNode<E>) children.get(0);
-		else
-			return null;
+		TreeNode root = getRoot();
+		return root.getChildCount() > 0 ? (SpaceTreeNode<E>) root.getChildAt(0)
+				: null;
 	}
 
 	public SpaceTreeNode<E> getSelectedNode() {
 		Iterator iter = getSelection().iterator();
-		if (iter.hasNext())
-			return (SpaceTreeNode<E>) iter.next();
-		else
-			return null;
+		return iter.hasNext() ? (SpaceTreeNode<E>) iter.next() : null;
 	}
 
 	public SpaceTreeNode<E> find(String id) {
