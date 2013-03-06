@@ -327,8 +327,7 @@ public class Orgchart extends XulElement {
 	}
 
 	public void setOrient(String orient) {
-		if (!"left".equals(orient) && !"right".equals(orient)
-				&& !"top".equals(orient) && !"bottom".equals(orient))
+		if (!"|left|right|top|bottom|".contains(orient))
 			throw new WrongValueException("Illegal orient: " + orient);
 		if (!Objects.equals(_orient, orient)) {
 			_orient = orient;
