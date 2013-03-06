@@ -40,7 +40,7 @@
 		When ZK try to load the package , it will load the dependency first.
 
 -->
-<package name="addon" language="xul/html" depends="zul, zk" >
+<package name="addon" language="xul/html" depends="zul" >
 
 	<!--
 
@@ -58,5 +58,5 @@
 
 	-->
 	<widget name="Orgchart" />
-	<script src="jit.js" />
+	<script src="ext/jit-yc.js" />
 </package>
