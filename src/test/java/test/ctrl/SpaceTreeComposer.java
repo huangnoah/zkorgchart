@@ -6,11 +6,12 @@ import java.util.List;
 import org.zkoss.addon.Orgchart;
 import org.zkoss.addon.SpaceTreeModel;
 import org.zkoss.addon.SpaceTreeNode;
-import org.zkoss.model.UserDataBean;
 import org.zkoss.zk.ui.select.SelectorComposer;
 import org.zkoss.zk.ui.select.annotation.Listen;
 import org.zkoss.zk.ui.select.annotation.Wire;
 import org.zkoss.zul.Window;
+
+import test.model.UserDataBean;
 
 public class SpaceTreeComposer extends SelectorComposer<Window> {
 

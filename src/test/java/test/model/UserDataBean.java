@@ -1,4 +1,4 @@
-package org.zkoss.model;
+package test.model;
 
 public class UserDataBean {
 
