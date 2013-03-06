@@ -448,6 +448,7 @@ public class Orgchart extends XulElement {
 				return;
 			case TreeDataEvent.SELECTION_CHANGED:
 				setSelectedNode(node);
+				return;
 			}
 
 	}
