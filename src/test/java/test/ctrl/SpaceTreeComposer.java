@@ -6,7 +6,6 @@ import org.zkoss.addon.SpaceTreeNode;
 import org.zkoss.zk.ui.select.SelectorComposer;
 import org.zkoss.zk.ui.select.annotation.Listen;
 import org.zkoss.zk.ui.select.annotation.Wire;
-import org.zkoss.zul.TreeNode;
 import org.zkoss.zul.Window;
 
 import test.model.UserDataBean;
@@ -20,7 +19,7 @@ public class SpaceTreeComposer extends SelectorComposer<Window> {
 		super.doAfterCompose(comp);
 
 		SpaceTreeNode<UserDataBean> root = new SpaceTreeNode(null, null);
-		SpaceTreeNode<UserDataBean> spacetreeRoot = new SpaceTreeNode(new UserDataBean("Partick", 23), null);
+		SpaceTreeNode<UserDataBean> spacetreeRoot = new SpaceTreeNode(new UserDataBean("Peter", 23), null);
 		root.add(spacetreeRoot);
 		SpaceTreeNode<UserDataBean> first = new SpaceTreeNode(new UserDataBean("Jason", 1), null);
 		SpaceTreeNode<UserDataBean> second = new SpaceTreeNode(new UserDataBean("Partick", 23), null);
