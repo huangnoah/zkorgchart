@@ -18,7 +18,7 @@ public class SpaceTreeNode<E> extends DefaultTreeNode<E> {
 	}
 		
 	public void add(org.zkoss.zul.TreeNode<E> child) {
-		if(isRoot() && getChildCount() == 1)
+		if(isRoot() && getChildCount() >= 1)
 			try {
 				throw new Exception("the root has one child at most");
 			} catch (Exception e) {
