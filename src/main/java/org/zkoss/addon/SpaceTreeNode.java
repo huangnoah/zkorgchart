@@ -10,30 +10,52 @@ public class SpaceTreeNode<E> extends DefaultTreeNode<E> {
 
 	private static int genId = 0;
 	private int id;
+	private boolean root;
 
 	public SpaceTreeNode(E data, Collection<SpaceTreeNode<E>> children) {
 		super(data, children);
 		id = genId++;
+		root = false;
+	}
+
+	public SpaceTreeNode(E data, Collection<SpaceTreeNode<E>> children,
+			boolean root) {
+		super(data, children);
+		id = genId++;
+		this.root = root;
 	}
 
 	@Override
 	protected void setParent(DefaultTreeNode<E> parent) {
-		// this method is called after the parent add child, so parent.getChildCount() must be equal or grater than 1
-		if (isRoot(parent) && parent.getChildCount() > 1)
+		// this method is called after the parent add child, so
+		// parent.getChildCount() must be equal or grater than 1
+		if (((SpaceTreeNode<E>) parent).isRoot() && parent.getChildCount() > 1)
 			try {
 				throw new Exception("the root has one child at most");
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-		else
+		else if (isRoot()) {
+			try {
+				throw new Exception("the root cant be the child");
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		} else
 			super.setParent(parent);
 	};
-	
+
 	@Override
 	public void add(org.zkoss.zul.TreeNode<E> child) {
-		if(isRoot(this) && getChildCount() >= 1)
+		if (isRoot() && getChildCount() >= 1)
 			try {
 				throw new Exception("the root has one child at most");
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		else if (((SpaceTreeNode<E>) child).isRoot())
+			try {
+				throw new Exception("the root cant be child");
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -41,9 +63,13 @@ public class SpaceTreeNode<E> extends DefaultTreeNode<E> {
 			super.add(child);
 	};
 
-	private static boolean isRoot(DefaultTreeNode node) {
-		return node != null && node.getData() == null
-				&& node.getParent() == null;
+	@Override
+	public org.zkoss.zul.DefaultTreeModel<E> getModel() {
+		return super.getModel();
+	};
+
+	public boolean isRoot() {
+		return root;
 	}
 
 	public int getId() {

@@ -18,7 +18,8 @@ public class SpaceTreeComposer extends SelectorComposer<Window> {
 	public void doAfterCompose(Window comp) throws Exception {
 		super.doAfterCompose(comp);
 
-		SpaceTreeNode<UserDataBean> root = new SpaceTreeNode(null, null);
+		// set true in last argument, that means is root
+		SpaceTreeNode<UserDataBean> root = new SpaceTreeNode(null, null, true);
 		SpaceTreeNode<UserDataBean> spacetreeRoot = new SpaceTreeNode(new UserDataBean("Peter", 23), null);
 		root.add(spacetreeRoot);
 		SpaceTreeNode<UserDataBean> first = new SpaceTreeNode(new UserDataBean("Jason", 1), null);
