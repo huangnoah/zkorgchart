@@ -2,17 +2,15 @@
 
 ## Introduction
 
-  The Orgchart is a tree browser (or call **SpaceTree**) that offers a convenient way to display data. (inspired by [JavaScript InfoVis Toolkit](http://philogb.github.com/jit/demos.html)) It consists of nodes and paths, and the paths represent the links connecting these nodes. You can expand or collapse individual nodes in the tree to show or hide its children. And you can change the attributes to affect how the tree is displayed. For example, use the **level** to adjust the number of levels that are shown in the tree. 
+Orgchart is a tree browser (or the so called SpaceTree) that offers a convenient way to display data, inspired by [JavaScript InfoVis Toolkit](http://philogb.github.com/jit/demos.html). The Orgchart consists of nodes and paths while path represents the links connecting the nodes. You can expand or collapse individual nodes in the tree to show or hide its children. You can also change the attributes to affect how the tree is displayed. For example, you can use *level* to adjust the number of levels that are shown in the tree.
 
-## Example
+## Example Scenario
 
-Suppose we want to make a orgchart to display the staffs information and the relations connecting those staffs.
+Suppose we want to make an orgchart to display a company's staffs' information and their relations.
 
 ### SpaceTree Layout
 
-To show the SpaceTree layout visualization we need a orgchart component. 
-The template tag regards the staff's name as the node label. 
-We have also added button for adding, removing a new node feature.
+To show the SpaceTree layout visualization, we need an orgchart component. The template tag refers the staff's name as the node label. We have also added a button for adding or removing a node.
 
 **ZUL**
   
@@ -30,12 +28,11 @@ We have also added button for adding, removing a new node feature.
 	</zk>
 
 
-Now, we can put the staffs information into Java bean (or the data of node) which is called **UserDataBean**, then we use the **UserDataBean** as the data of **SpaceTreeNode** and create the relations in **SpaceTreeNode**.
+Now, we can put the staffs' information into a Java bean (or the data of node) which is called *UserDataBean*, then we use the *UserDataBean* as the data of *SpaceTreeNode* and create their relations in *SpaceTreeNode*.
 
-### Put the staffs information into Java Bean
+### Insert staff information into Java Bean
 
-The **UserDataBean** represents the data of **SpaceTreeNode** and the **SpaceTreeNode**s make up the **SpaceTree**.
-You can use template tag in zul or customize the item renderer in composer to generate the value which shows on the node label, or by default the value will be object#toString().  
+*UserDataBean* represents the data of *SpaceTreeNode* and *SpaceTreeNode* makes up the *SpaceTree*. You can use template tag in zul or customize the item renderer in a composer to generate the value which shows on the node label. By default the value will be *object#toString()*.
 
 **JavaBean**
   
@@ -51,53 +48,38 @@ You can use template tag in zul or customize the item renderer in composer to ge
     
 ### Initialize Spacetree
 
-Create some SpaceTree nodes and combine all nodes together.
-The ItemRenderer is used to customize the value which shows on the node label.
-You can customize the item renderer if you don't want to use template tag in zul or override object#toString().  
+Create some SpaceTree nodes and combine all nodes together. The *ItemRenderer* is used to customize the value that shows on the node label. You can customize the item renderer if you don't want to use template tag in zul or override *object#toString()*.
 
 **Composer**
-  
-    public class SpaceTreeComposer extends SelectorComposer<Window> {
-
+  	
+	public class SpaceTreeComposer extends SelectorComposer<Window> {
+	
 		@Wire("#myComp")
 		private Orgchart myComp;
 	
 		public void doAfterCompose(Window comp) throws Exception {
 			super.doAfterCompose(comp);
 	
+			// set true in last argument, that means is root
+			SpaceTreeNode<UserDataBean> root = new SpaceTreeNode(null, null, true);
+			SpaceTreeNode<UserDataBean> spacetreeRoot = new SpaceTreeNode(new UserDataBean("Peter", 23), null);
+			root.add(spacetreeRoot);
+			SpaceTreeNode<UserDataBean> first = new SpaceTreeNode(new UserDataBean("Jason", 1), null);
+			SpaceTreeNode<UserDataBean> second = new SpaceTreeNode(new UserDataBean("Partick", 23), null);
+			spacetreeRoot.add(first);
+			spacetreeRoot.add(second);
 			SpaceTreeNode jack = new SpaceTreeNode(new UserDataBean("Jack", 11),
 					null);
 			SpaceTreeNode mary = new SpaceTreeNode(new UserDataBean("Mary", 12),
 					null);
-	
-			List<SpaceTreeNode<UserDataBean>> firstChildren = new ArrayList<SpaceTreeNode<UserDataBean>>();
-			firstChildren.add(jack);
-			firstChildren.add(mary);
-			firstChildren
-					.add(new SpaceTreeNode(new UserDataBean("Jean", 13), null));
-			SpaceTreeNode<UserDataBean> first = new SpaceTreeNode(new UserDataBean(
-					"Jason", 1), firstChildren);
-	
-			List<SpaceTreeNode<UserDataBean>> secondChildren = new ArrayList<SpaceTreeNode<UserDataBean>>();
-			secondChildren
-					.add(new SpaceTreeNode(new UserDataBean("Sam", 21), null));
-			secondChildren
-					.add(new SpaceTreeNode(new UserDataBean("Tom", 22), null));
-			secondChildren
-					.add(new SpaceTreeNode(new UserDataBean("Tim", 23), null));
-			SpaceTreeNode<UserDataBean> second = new SpaceTreeNode(
-					new UserDataBean("Partick", 23), secondChildren);
-	
-			List<SpaceTreeNode<UserDataBean>> spacetreeRootChildren = new ArrayList<SpaceTreeNode<UserDataBean>>();
-			spacetreeRootChildren.add(first);
-			spacetreeRootChildren.add(second);
-			SpaceTreeNode<UserDataBean> spacetreeRoot = new SpaceTreeNode(
-					new UserDataBean("Peter", 0), spacetreeRootChildren);
-	
-			List<SpaceTreeNode<UserDataBean>> rootChild = new ArrayList<SpaceTreeNode<UserDataBean>>();
-			rootChild.add(spacetreeRoot);
-			SpaceTreeNode<UserDataBean> root = new SpaceTreeNode(null, rootChild);
-	
+			first.add(jack);
+			first.add(mary);
+			first.add(new SpaceTreeNode(new UserDataBean("Jean", 13), null));
+			second.add(new SpaceTreeNode(new UserDataBean("Sam", 21), null));
+			second.add(new SpaceTreeNode(new UserDataBean("Tom", 22), null));
+			second.add(new SpaceTreeNode(new UserDataBean("Tim", 23), null));
+			
+			
 			// customize your renderer, the data means your bean, and index means the node id
 			// myComp.setItemRenderer(new ItemRenderer() {
 			// @Override
