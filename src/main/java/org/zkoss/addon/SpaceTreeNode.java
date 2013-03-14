@@ -29,7 +29,8 @@ public class SpaceTreeNode<E> extends DefaultTreeNode<E> {
 	protected void setParent(DefaultTreeNode<E> parent) {
 		// this method is called after the parent add child, so
 		// parent.getChildCount() must be equal or grater than 1
-		if (((SpaceTreeNode<E>) parent).isRoot() && parent.getChildCount() > 1)
+		if (parent != null && ((SpaceTreeNode<E>) parent).isRoot()
+				&& parent.getChildCount() > 1)
 			try {
 				throw new Exception("the root has one child at most");
 			} catch (Exception e) {
